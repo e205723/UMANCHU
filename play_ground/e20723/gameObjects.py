@@ -43,6 +43,7 @@ class Property():
         self.price = price
         self.percentage = percentage
         self.owner = None
+        self.station = None
 
 class Card():
     def __init__(self, name, price):
@@ -108,7 +109,10 @@ class Map():
             return CardMarketSquare(True, True, letter, [])
         elif letter == "駅":
             self.index += 1
-            return StationSquare(True, True, letter, *self.propertyInfo[self.index])
+            stationSquare = StationSquare(True, True, letter, *self.propertyInfo[self.index])
+            for property in self.propertyInfo[self.index][2]:
+                property.station = stationSquare
+            return stationSquare
         elif letter == "縦":
             return Square(True, False, letter)
         elif letter == "横":
@@ -127,3 +131,21 @@ class Time():
         self.month = month
         self.monthlyCoefficeints = monthlyCoefficeints
         self.year = year
+
+
+class Mode():
+    def __init__(self):
+        self.previous = None
+
+    def goBack(self):
+        return self.previous
+
+    def flow(self, model, arg):
+        pass
+
+class Opening(Mode):
+    def __init__(self):
+        super(Opening, self).__init__()
+
+    def flow(self, model, arg):
+        pass

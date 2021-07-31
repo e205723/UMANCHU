@@ -20,6 +20,7 @@ class Model():
         self.header = ["" for _ in range(2)]
         self.top = [""]
         self.message = ["" for _ in range(6)]
+        self.messageIndex = 0
         self.darken = False
 
     def extractMap(self, coordinate = [55, 11]):
@@ -28,5 +29,24 @@ class Model():
     def generateUnitMap(self, coordinate = [55, 11]):
         return [[self.unitMap[coordinate[1] + i - 5][coordinate[0] + j - 13][-1] for j in range(22)] for i in range(11)]
 
-    def getInfoToDisplay(self):
-        return [self.extractMap(), self.generateUnitMap(), self.arrow, self.menuIndex, self.log, self.select, self.select_mode, self.select_index, self.header, self.top, self.message, self.darken]
+    def sendInfo(self):
+        print([self.extractMap(), self.generateUnitMap(), self.arrow, self.menuIndex, self.log, self.select, self.select_mode, self.select_index, self.header, self.top, self.message, self.darken])
+
+    def listenKeyAction(self, type):
+        if type == "message":
+            if input("type d") == "d":
+                pass
+            else:
+                if self.messageIndex != 0:
+                     self.messageIndex -= 2
+
+    def getMessage(self, message):
+        for i in range(len(self.message)):
+            self.message[i] = message[self.messageIndex * 72 + i * 12: self.messageIndex * 72 + (i + 1) * 12]
+            sendInfo()
+            listenKeyAction("message")
+            if len(message[(self.messageIndex + 1) * 72: (self.messageIndex + 1) * 72 + 12]) > 0:
+                self.messageIndex += 1
+                getMessage(message)
+            else:
+                pass
