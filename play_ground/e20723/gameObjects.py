@@ -173,7 +173,8 @@ class Mode():
         self.mode = None
 
     def goBack(self, model):
-        model.currentMode =  self.previous
+        if not self.previous is None:
+            model.currentMode =  self.previous
 
     def flow(self, model):
         pass
@@ -184,9 +185,7 @@ class Opening(Mode):
         self.mode = "opening"
 
     def flow(self, model):
-        model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "目駅"
         model.sendMessage(messages[0].replace("$", model.destination.name))
-        model.currentMode = Menu(model.currentMode)
 
 class Menu(Mode):
     def __init__(self, previous):
@@ -195,4 +194,16 @@ class Menu(Mode):
 
     def flow(self, model):
         model.sendMenu()
-        
+
+class BeforeThrowingDice(Mode):
+    def __init__(self, previous):
+        super(BeforeThrowingDice, self).__init__(previous)
+        self.mode = "beforeThrowingDice"
+
+    def flow(self, model):
+        model.sendLog(messages[1], "beforeThrowingDice")
+        #self.currentMode = Move(self.currentMode)
+
+'''
+Moveクラスを作成
+'''

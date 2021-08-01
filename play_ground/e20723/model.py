@@ -9,6 +9,7 @@ class Model():
         self.time = Time()
         self.currentMode = None
         self.messageIndex = 0
+        self.logIndex = 0
         self.map = Map(propertyInfo, letterMap)
         self.unitMap = [[[None] for j in range(73)] for i in range(59)]
 
@@ -17,6 +18,7 @@ class Model():
             destinationIndex = randint(0,67)
         distinationInfo = self.map.propertyInfo[destinationIndex]
         self.destination = self.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
+        self.map.squaresMatrix[self.destination.coordinate[1]][self.destination.coordinate[0]].color = "目駅"
 
         for user in self.users:
             self.unitMap[user.coordinate[1]][user.coordinate[0]].append(str(user.order) + user.direction)
@@ -106,6 +108,12 @@ class Model():
             info[8] = self.getHeader()
             info[10] = False
             print(info)
+        elif type == "log":
+            info = [None for _ in range(12)]
+            info[0] = self.getExtractedMap()
+            info[1] = self.getUnitMap()
+            info[8] = self.message
+            info[10] = False
         else:
             print([self.getExtractedMap(), self.getUnitMap(), self.arrow, self.menuIndex, self.log, self.select, self.selectMode, self.selectIndex, self.header, self.top, self.darken, self.message])
 
@@ -127,13 +135,23 @@ class Model():
             elif keyAction == "k" and self.menuIndex != 2:
                 self.menuIndex += 1
             elif keyAction == "d":
-                pass
-            
+                if self.menuIndex == 0:
+                    self.currentMode = BeforeThrowingDice(self.currentMode)
+                elif self.menuIndex == 1:
+                    '''
+                    カードを使う
+                    '''
+                    pass
+                elif self.menuIndex == 2:
+                    '''
+                    むしめがね
+                    '''
+                    pass
 
     def sendMessage(self, message):
         type = "message"
 
-        for i in range(len(self.message)):
+        for i in range(6):
             self.message[i] = message[self.messageIndex * 72 + i * 12: self.messageIndex * 72 + (i + 1) * 12]
         self.sendInfo(type)
         self.listenKeyAction(type)
@@ -149,3 +167,22 @@ class Model():
         type = "menu"
         self.sendInfo(type)
         self.listenKeyAction(type)
+
+    def sendLog(self, log, mode):
+        type = "log"
+
+        for i in range(3):
+            self.log[i] = log[self.logIndex * 41 + i * 17: self.logIndex * 41 + (i + 1) * 17]
+        self.sendInfo(type)
+        self.listenKeyAction(type)
+        if len(log[(self.logIndex + 1) * 41: (self.logIndex + 1) * 41 + 17]) > 0:
+            self.logIndex += 1
+            self.sendLog(log)
+        else:
+            self.logIndex = 0
+            if mode == "beforeThrowingDice":
+                '''
+                移動モード(Moveを実装しなければならない)
+                '''
+                #self.currentMode = Move(None)
+                print("移動モード(Moveを実装しなければならない)")
