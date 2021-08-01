@@ -1,4 +1,6 @@
-import random
+from letterMap import letterMap
+from messages import messages
+from random import randint
 
 class Unit():
     def __init__(self, coordinate, direction):
@@ -6,16 +8,30 @@ class Unit():
         self.direction = direction
 
 class User(Unit):
-    def __init__(self, userIP, userName, order, coordinate, direction):
+    def __init__(self, ip, name, order, coordinate, direction):
         super(User, self).__init__(coordinate, direction)
         self.order = order
-        self.userIP = userIP
-        self.userName = userName
+        self.ip = ip
+        self.name = name
         #initialize a user's money with 1000
-        self.money = 1000
+        self.money = 10000
         self.properties = []
         self.cards = []
         self.steps = 0
+
+    def kanijMoney(self):
+        kanjiMoney = ""
+        num = self.money
+        if num//100000000 > 0:
+            kanjiMoney += str(num//100000000) + "兆"
+            num = num % 100000000
+        if num//10000 > 0:
+            kanjiMoney += str(num//100000) + "億"
+            num %= num % 10000
+
+        kanjiMoney += str(num) + "万円"
+
+        return kanjiMoney
 
     def throwDice():
         pass
@@ -119,7 +135,7 @@ class Map():
             return Square(True, False, letter)
         elif letter == "緑":
             greenSquares = ["緑", "草", "木"]
-            return Square(False, False, greenSquares[random.randint(0,2)])
+            return Square(False, False, greenSquares[randint(0,2)])
         elif letter == "水":
             return Square(False, False, letter)
 
@@ -127,15 +143,29 @@ class Map():
         pass
 
 class Time():
-    def __init__(self, month, monthlyCoefficeints, year):
-        self.month = month
-        self.monthlyCoefficeints = monthlyCoefficeints
-        self.year = year
+    def __init__(self):
+        self.month = 4
+        self.monthlyCoefficeints = [0, 0.5, 0.6, 0.9, 1.0, 1.3, 1.6, 1.9, 2, 1.8, 1.2, 0.8, 0.4]
+        self.correntMonthlyCoefficient = 1.0
+        self.year = 1
+        self.limit = 4
 
+    def getTime(self):
+        return str(year) + "年目 " + str(month) + "月"
+
+    def update(self):
+        self.month += 1
+        if self.month == 13:
+            self.mongth = 1
+            self.correntMonthlyCoefficient = self.monthlyCoefficeints[self.month]
+            self.year += 1
+
+    def hasReachedTheLimit(self):
+        return self.year == self.limit + 1
 
 class Mode():
-    def __init__(self):
-        self.previous = None
+    def __init__(self, previous):
+        self.previous = previous
 
     def goBack(self):
         return self.previous
@@ -144,8 +174,14 @@ class Mode():
         pass
 
 class Opening(Mode):
-    def __init__(self):
-        super(Opening, self).__init__()
+    def __init__(self, previous):
+        super(Opening, self).__init__(previous)
 
     def flow(self, model, arg):
-        pass
+        destinationIndex = 5
+        while destinationIndex == 5:
+            destinationIndex = randint(0,67)
+        distinationInfo = model.map.propertyInfo[destinationIndex]
+        model.destination = model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
+        model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]].name = "目駅"
+        model.sendMessage(messages[0].replace("$", distinationInfo[0]))
