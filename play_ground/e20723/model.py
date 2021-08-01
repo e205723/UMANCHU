@@ -52,9 +52,9 @@ class Model():
         result = ""
 
         if horizontlDistance > 0:
-            result += "ひだりヘ" + str(int(horizontlDistance)) + "マス"
+            result += "ひだり" + str(int(horizontlDistance))
         elif horizontlDistance < 0:
-            result += "みぎヘ" + str(-int(horizontlDistance)) + "マス"
+            result += "みぎ" + str(-int(horizontlDistance))
         else:
             pass
 
@@ -62,9 +62,9 @@ class Model():
             result += "、"
 
         if verticalDistance > 0:
-            result += "うえヘ" + str(int(verticalDistance)) + "マス"
+            result += "うえ" + str(int(verticalDistance))
         elif verticalDistance < 0:
-            result += "したヘ" + str(-int(verticalDistance)) + "マス"
+            result += "した" + str(-int(verticalDistance))
         else:
             pass
 
@@ -91,8 +91,8 @@ class Model():
                 self.arrow = 2
 
     def getHeader(self):
-        self.header[0] = self.users[self.userIndex].name + "さん " + self.users[self.userIndex].kanijMoney()
-        self.header[1] = "もくてきちまで" + self.getDistanceFromDestiny(self.users[self.userIndex].coordinate) + " " + self.time.getTime()
+        self.header[0] = self.users[self.userIndex].name + " " + self.users[self.userIndex].kanijMoney()
+        self.header[1] = self.getDistanceFromDestiny(self.users[self.userIndex].coordinate) + "、" + self.time.getTime()
 
     def sendInfo(self, type):
         if type == "message":
@@ -105,7 +105,8 @@ class Model():
             info[0] = self.getExtractedMap()
             info[1] = self.getUnitMap()
             info[3] = self.menuIndex
-            info[8] = self.getHeader()
+            self.getHeader()
+            info[8] = self.header
             info[10] = False
             print(info)
         elif type == "log":

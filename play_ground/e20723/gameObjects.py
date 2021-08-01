@@ -155,7 +155,7 @@ class Time():
         self.limit = 4
 
     def getTime(self):
-        return str(self.year) + "年目 " + str(self.month) + "月"
+        return str(self.year) + "年目" + str(self.month) + "月"
 
     def update(self):
         self.month += 1
@@ -202,7 +202,11 @@ class BeforeThrowingDice(Mode):
 
     def flow(self, model):
         model.sendLog(messages[1], "beforeThrowingDice")
+        '''
+        Moveモードを実装したらコメントアウト取り消し
+        '''
         #self.currentMode = Move(self.currentMode)
+
 
 '''
 Moveクラスを作成
