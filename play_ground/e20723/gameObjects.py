@@ -69,7 +69,6 @@ class Property():
 class Card():
     def __init__(self, name, price):
         self.name = name
-        self.price = price
 
 class Square():
     def __init__(self, isAccessible, isStoppable, color):
@@ -168,6 +167,9 @@ class Time():
     def hasReachedTheLimit(self):
         return self.year == self.limit + 1
 
+    def isMarchOver(self):
+        return self.mangth == 4
+
 class Mode():
     def __init__(self, previous):
         self.previous = previous
@@ -186,7 +188,7 @@ class Opening(Mode):
         self.mode = "opening"
 
     def flow(self, model):
-        model.sendMessage(messages[0].replace("$", model.destination.name))
+        model.sendMessage(messages[0].replace("$", model.destination.name), self.mode)
 
 class Menu(Mode):
     def __init__(self, previous):
@@ -202,11 +204,7 @@ class BeforeThrowingDice(Mode):
         self.mode = "beforeThrowingDice"
 
     def flow(self, model):
-        model.sendLog(messages[1], "beforeThrowingDice")
-        '''
-        Moveモードを実装したらコメントアウト取り消し
-        '''
-        #self.currentMode = Move(self.currentMode)
+        model.sendLog(messages[1], self.mode)
 
 class AfterThrowingDice(Mode):
     def __init__(self, previous):
@@ -215,15 +213,44 @@ class AfterThrowingDice(Mode):
 
     def flow(self, model):
         model.users[model.userIndex].steps = randint(1, 6)
-        model.sendLog(messages[2].replace("$", str(model.users[model.userIndex].steps)), "afterThrowingDice")
-'''
-Moveクラスを作成
-'''
+        model.sendLog(messages[2].replace("$", str(model.users[model.userIndex].steps)), self.mode)
 
 class Move(Mode):
     def __init__(self, previous):
-        super(AfterThrowingDice, self).__init__(previous)
+        super(Move, self).__init__(previous)
         self.mode = "move"
 
     def flow(self, model):
         model.sendMove()
+
+class BlueSquareMode():
+    def __init__(self, previous):
+        super(BlueSquareMode, self).__init__(previous)
+        self.mode = "blueSquareMode"
+
+    def flow(self, model):
+        plus = int(10000 * model.time.correntMonthlyCoefficient)
+        model.users[model.userIndex].money += plus
+        log = messages[3].replace("$1", model.users[model.userIndex].name)
+        log = log.replace("$2", str(plus))
+        log = log.replace("$3", model.users[model.userIndex].kanjiMoney())
+        model.sendLog(log, self.mode)
+
+class RedSquareMode():
+    def __init__(self, previous):
+        super(RedSquareMode, self).__init__(previous)
+        self.mode = "redSquareMode"
+
+    def flow(self, model):
+        minus = int(10000 * model.time.correntMonthlyCoefficient)
+        model.users[model.userIndex].money -= minus
+        if model.users[model.userIndex].money < 0:
+            model.users[model.userIndex].money = 0
+            log = messages[3].replace("$1", model.users[model.userIndex].name)
+            log = log.replace("$2", str(-minus))
+        else:
+            log = messages[4].replace("$1", model.users[model.userIndex].name)
+            log = log.replace("$2", str(-minus))
+            log = log.replace("$3", model.users[model.userIndex].kanjiMoney())
+
+        model.sendLog(log, self.mode)

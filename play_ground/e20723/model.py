@@ -45,6 +45,12 @@ class Model():
             else:
                 self.currentMode.flow(self)
 
+    def updateUserIndex(self):
+        if self.userIndex == 3:
+            self.userIndex = 0
+        else:
+            self.userIndex += 1
+
     def getDistanceFromDestiny(self, coordinate):
         horizontlDistance = (coordinate[0] - self.destination.coordinate[0])/3
         verticalDistance = (coordinate[1] - self.destination.coordinate[1])/3
@@ -116,12 +122,14 @@ class Model():
             info[1] = self.getUnitMap(user.coordinate)
             info[8] = self.message
             info[10] = False
+            print(info)
         elif type == "move":
             info = [None for _ in range(12)]
             info[0] = self.getExtractedMap(user.coordinate)
             info[1] = self.getUnitMap(user.coordinate)
             info[2] = user.getArrowDirection(user.coordinate)
             info[9] = user.name + " あと" + str(user.steps) + "ほ"
+            print(info)
         else:
             print([self.getExtractedMap(user.coordinate), self.getUnitMap(user.coordinate), self.arrow, self.menuIndex, self.log, self.select, self.selectMode, self.selectIndex, self.header, self.top, self.darken, self.message])
 
@@ -149,12 +157,7 @@ class Model():
                     self.currentMode = BeforeThrowingDice(self.currentMode)
                 elif self.menuIndex == 1:
                     '''
-                    カードを使う
-                    '''
-                    pass
-                elif self.menuIndex == 2:
-                    '''
-                    むしめがね
+                    カードモード
                     '''
                     pass
         elif type == "log":
@@ -171,71 +174,28 @@ class Model():
             keyAction = input("type h or j or k or l:  ")
             user = self.users[self.userIndex]
 
-            if keyAction == "h" and self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0] - 3].isStoppable:
+            h = -3 * int(keyAction == "h")
+            j = 3 * int(keyAction == "j")
+            k = = -3 * int(keyAction == "k")
+            l = 3 * int(keyAction == "l")
+
+            if self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l].isStoppable:
                 if len(self.visitedSquares) == 0:
                     self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                     user.steps -= 1
                 else:
-                    if self.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0] - 3]:
+                    if self.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l]:
                         self.visitedSquares.pop(-1)
                         user.steps += 1
                     else:
                         self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                         user.steps -= 1
                 self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
-                self.unitMap[user.coordinate[1]][user.coordinate[0] - 3].append(str(self.userIndex) + "h")
-                user.coordinate = [user.coordinate[0] - 3, user.coordinate[1]]
-                user.direction = "h"
+                self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append(str(self.userIndex) + keyAction)
+                user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
+                user.direction = keyAction
 
-            elif keyAction == "j" and self.map.squaresMatrix[user.coordinate[1] + 3][user.coordinate[0]].isStoppable:
-                if len(self.visitedSquares) == 0:
-                    self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                    user.steps -= 1
-                else:
-                    if self.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1] + 3][user.coordinate[0]]:
-                        self.visitedSquares.pop(-1)
-                        user.steps += 1
-                    else:
-                        self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                        user.steps -= 1
-                self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
-                self.unitMap[user.coordinate[1] + 3][user.coordinate[0]].append(str(self.userIndex) + "j")
-                user.coordinate = [user.coordinate[0], user.coordinate[1] + 3]
-                user.direction = "j"
-
-            elif keyAction == "k" and self.map.squaresMatrix[user.coordinate[1] - 3][user.coordinate[0]].isStoppable:
-                if len(self.visitedSquares) == 0:
-                    self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                    user.steps -= 1
-                else:
-                    if self.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1] - 3][user.coordinate[0]]:
-                        self.visitedSquares.pop(-1)
-                        user.steps += 1
-                    else:
-                        self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                        user.steps -= 1
-                self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
-                self.unitMap[user.coordinate[1] - 3][user.coordinate[0]].append(str(self.userIndex) + "k")
-                user.coordinate = [user.coordinate[0], user.coordinate[1] - 3]
-                user.direction = "k"
-
-            elif keyAction == "l" and self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0] + 3].isStoppable:
-                if len(self.visitedSquares) == 0:
-                    self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                    user.steps -= 1
-                else:
-                    if self.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0] + 3]:
-                        self.visitedSquares.pop(-1)
-                        user.steps += 1
-                    else:
-                        self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                        user.steps -= 1
-                self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
-                self.unitMap[user.coordinate[1]][user.coordinate[0] + 3].append(str(self.userIndex) + "l")
-                user.coordinate = [user.coordinate[0] + 3, user.coordinate[1]]
-                user.direction = "l"
-
-    def sendMessage(self, message):
+    def sendMessage(self, message, mode):
         type = "message"
 
         for i in range(6):
@@ -245,10 +205,11 @@ class Model():
 
         if len(message[(self.messageIndex + 1) * 72: (self.messageIndex + 1) * 72 + 12]) > 0:
             self.messageIndex += 1
-            self.sendMessage(message)
+            self.sendMessage(message, mode)
         else:
             self.messageIndex = 0
-            self.currentMode = Menu(self.currentMode)
+            if mode == "opening":
+                self.currentMode = Menu(self.currentMode)
 
     def sendMenu(self):
         type = "menu"
@@ -264,13 +225,16 @@ class Model():
         self.listenKeyAction(type)
         if len(log[(self.logIndex + 1) * 41: (self.logIndex + 1) * 41 + 17]) > 0:
             self.logIndex += 1
-            self.sendLog(log)
+            self.sendLog(log, mode)
         else:
             self.logIndex = 0
             if mode == "beforeThrowingDice":
                 self.currentMode = AfterThrowingDice(None)
             elif mode == "afterThrowingDice":
                 self.currentMode = Move(self.currentMode)
+            elif mode == "blueSquareMode" or mode == "redSquareMode"::
+                self.updateUserIndex()
+                self.currentMode =  Menu(None)
 
     def sendMove(self):
         type = "move"
@@ -296,17 +260,13 @@ class Model():
                 #self.currentMode = StationSquareMode(None)
                 pass
             elif colorOfArrived == "青":
-                '''
-                青マスモード
-                '''
-                #self.currentMode = BlueSquareMode(None)
-                pass
+                self.currentMode = BlueSquareMode(None)
+
             elif colorOfArrived == "赤":
                 '''
                 赤マスモード
                 '''
-                #self.currentMode = BlueSquareMode(None)
-                pass
+                self.currentMode = RedSquareMode(None)
             elif colorOfArrived == "黄":
                 '''
                 黄マスモード
