@@ -50,9 +50,9 @@ class Model():
         result = ""
 
         if horizontlDistance > 0:
-            result += "ひだりヘ" + str(horizontlDistance) + "マス"
+            result += "ひだりヘ" + str(int(horizontlDistance)) + "マス"
         elif horizontlDistance < 0:
-            result += "みぎヘ" + str(-horizontlDistance) + "マス"
+            result += "みぎヘ" + str(-int(horizontlDistance)) + "マス"
         else:
             pass
 
@@ -60,9 +60,9 @@ class Model():
             result += "、"
 
         if verticalDistance > 0:
-            result += "うえヘ" + str(horizontlDistance) + "マス"
+            result += "うえヘ" + str(int(verticalDistance)) + "マス"
         elif verticalDistance < 0:
-            result += "したヘ" + str(-horizontlDistance) + "マス"
+            result += "したヘ" + str(-int(verticalDistance)) + "マス"
         else:
             pass
 
@@ -89,7 +89,7 @@ class Model():
                 self.arrow = 2
 
     def getHeader(self):
-        self.header[0] = self.users[self.userIndex].name + " " + self.users[self.userIndex].kanijMoney()
+        self.header[0] = self.users[self.userIndex].name + "さん " + self.users[self.userIndex].kanijMoney()
         self.header[1] = "もくてきちまで" + self.getDistanceFromDestiny(self.users[self.userIndex].coordinate) + " " + self.time.getTime()
 
     def sendInfo(self, type):
@@ -121,15 +121,14 @@ class Model():
                     self.messageIndex -= 1
             return keyAction
         elif type == "menu":
-            keyAction = input("type j or k or s or d: ")
+            keyAction = input("type j or k or d: ")
             if keyAction == "j" and self.menuIndex != 0:
                 self.menuIndex -= 1
             elif keyAction == "k" and self.menuIndex != 2:
                 self.menuIndex += 1
-            elif keyAction == "s":
-                self.currentMode.goBack(self)
             elif keyAction == "d":
                 pass
+            
 
     def sendMessage(self, message):
         type = "message"
@@ -144,6 +143,7 @@ class Model():
             self.sendMessage(message)
         else:
             self.messageIndex = 0
+            self.currentMode = Menu(self.currentMode)
 
     def sendMenu(self):
         type = "menu"

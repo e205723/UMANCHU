@@ -1,6 +1,7 @@
 from letterMap import letterMap
 from messages import messages
 from random import randint
+import copy
 
 class Unit():
     def __init__(self, coordinate, direction):
@@ -21,15 +22,18 @@ class User(Unit):
 
     def kanijMoney(self):
         kanjiMoney = ""
-        num = self.money
+        #値渡し
+        num = self.money * 1
         if num//100000000 > 0:
             kanjiMoney += str(num//100000000) + "兆"
             num = num % 100000000
         if num//10000 > 0:
-            kanjiMoney += str(num//100000) + "億"
+            kanjiMoney += str(num//10000) + "億"
             num = num % 10000
+        if num > 0:
+            kanjiMoney += str(num) + "万"
 
-        kanjiMoney += str(num) + "万円"
+        kanjiMoney += "円"
 
         return kanjiMoney
 
@@ -191,4 +195,4 @@ class Menu(Mode):
 
     def flow(self, model):
         model.sendMenu()
-        model.sendInfo(type)
+        
