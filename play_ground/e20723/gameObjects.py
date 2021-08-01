@@ -19,6 +19,7 @@ class User(Unit):
         self.properties = []
         self.cards = []
         self.steps = 0
+        self.visitedSquares = []
 
     def kanijMoney(self):
         kanjiMoney = ""
@@ -207,7 +208,22 @@ class BeforeThrowingDice(Mode):
         '''
         #self.currentMode = Move(self.currentMode)
 
+class AfterThrowingDice(Mode):
+    def __init__(self, previous):
+        super(AfterThrowingDice, self).__init__(previous)
+        self.mode = "afterThrowingDice"
 
+    def flow(self, model):
+        model.users[model.userIndex].steps = randint(1, 6)
+        model.sendLog(messages[2].replace("$", str(model.users[model.userIndex].steps)), "afterThrowingDice")
 '''
 Moveクラスを作成
 '''
+
+class Move(Mode):
+    def __init__(self, previous):
+        super(AfterThrowingDice, self).__init__(previous)
+        self.mode = "move"
+
+    def flow(self, model):
+        model.sendMove()
