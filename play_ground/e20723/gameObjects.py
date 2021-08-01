@@ -27,7 +27,7 @@ class User(Unit):
             num = num % 100000000
         if num//10000 > 0:
             kanjiMoney += str(num//100000) + "億"
-            num %= num % 10000
+            num = num % 10000
 
         kanjiMoney += str(num) + "万円"
 
@@ -151,7 +151,7 @@ class Time():
         self.limit = 4
 
     def getTime(self):
-        return str(year) + "年目 " + str(month) + "月"
+        return str(self.year) + "年目 " + str(self.month) + "月"
 
     def update(self):
         self.month += 1
@@ -166,22 +166,29 @@ class Time():
 class Mode():
     def __init__(self, previous):
         self.previous = previous
+        self.mode = None
 
-    def goBack(self):
-        return self.previous
+    def goBack(self, model):
+        model.currentMode =  self.previous
 
-    def flow(self, model, arg):
+    def flow(self, model):
         pass
 
 class Opening(Mode):
     def __init__(self, previous):
         super(Opening, self).__init__(previous)
+        self.mode = "opening"
 
-    def flow(self, model, arg):
-        destinationIndex = 5
-        while destinationIndex == 5:
-            destinationIndex = randint(0,67)
-        distinationInfo = model.map.propertyInfo[destinationIndex]
-        model.destination = model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
-        model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]].name = "目駅"
-        model.sendMessage(messages[0].replace("$", distinationInfo[0]))
+    def flow(self, model):
+        model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "目駅"
+        model.sendMessage(messages[0].replace("$", model.destination.name))
+        model.currentMode = Menu(model.currentMode)
+
+class Menu(Mode):
+    def __init__(self, previous):
+        super(Menu, self).__init__(previous)
+        self.mode = "menu"
+
+    def flow(self, model):
+        model.sendMenu()
+        model.sendInfo(type)

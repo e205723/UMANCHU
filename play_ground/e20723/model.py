@@ -1,37 +1,47 @@
 from propertyInfo import propertyInfo
 from gameObjects import *
-import random
+from random import randint
 
 class Model():
     def __init__(self, UserIPList, userNameList):
         self.users = [User(userIP, userName, order, [55, 11], 'u') for userIP, userName, order in zip(UserIPList, userNameList, range(4))]
+        self.userIndex = 0
+        self.time = Time()
+        self.currentMode = None
+        self.messageIndex = 0
         self.map = Map(propertyInfo, letterMap)
         self.unitMap = [[[None] for j in range(73)] for i in range(59)]
-        self.time = Time()
-        self.current_mode = None
-        self.destination = None
+
+        destinationIndex = 5
+        while destinationIndex == 5:
+            destinationIndex = randint(0,67)
+        distinationInfo = self.map.propertyInfo[destinationIndex]
+        self.destination = self.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
 
         for user in self.users:
             self.unitMap[user.coordinate[1]][user.coordinate[0]].append(str(user.order) + user.direction)
 
         #print(self.extractMap([55, 11]))
         #print(self.generateUnitMap([55, 11]))
-        self.arrow = None
+        self.arrow = 5
         #self.menuはいらない、クライアント側にある
-        self.menuIndex = 4
+        self.menuIndex = 0
         self.log = ["" for _ in range(3)]
         self.select = ["" for _ in range(6)]
-        self.select_mode = 2
+        self.selectMode = 2
         self.selectIndex = 6
         self.header = ["" for _ in range(2)]
         self.top = [""]
-        self.message = ["" for _ in range(6)]
-        self.messageIndex = 0
         self.darken = False
+        self.message = ["" for _ in range(6)]
 
     def run(self):
-        self.current_mode = Opening(None)
-        self.current_mode.flow(self, None)
+        while True:
+            if  self.currentMode is None:
+                self.currentMode = Opening(None)
+                self.currentMode.flow(self)
+            else:
+                self.currentMode.flow(self)
 
     def getDistanceFromDestiny(self, coordinate):
         horizontlDistance = (coordinate[0] - self.destination.coordinate[0])/3
@@ -52,7 +62,7 @@ class Model():
         if verticalDistance > 0:
             result += "うえヘ" + str(horizontlDistance) + "マス"
         elif verticalDistance < 0:
-            result += "したヘ" + str(horizontlDistance) + "マス"
+            result += "したヘ" + str(-horizontlDistance) + "マス"
         else:
             pass
 
@@ -76,25 +86,50 @@ class Model():
             if verticalDistance > 0:
                 self.arrow = 0
             else:
-                self.arrow = 4
+                self.arrow = 2
 
-    def getHeader(self, uer):
-        self.header[0] = user.name + " " + user.kanijMoney()
-        self.header[1] = "もくてきちまで" + self.getDistanceFromDestiny(user.coordinate) + " " + self.time.getTime()
+    def getHeader(self):
+        self.header[0] = self.users[self.userIndex].name + " " + self.users[self.userIndex].kanijMoney()
+        self.header[1] = "もくてきちまで" + self.getDistanceFromDestiny(self.users[self.userIndex].coordinate) + " " + self.time.getTime()
 
     def sendInfo(self, type):
         if type == "message":
-            print([self.getExtractedMap(), self.getUnitMap(), self.arrow, self.menuIndex, self.log, self.select, self.select_mode, self.selectIndex, self.header, self.top, self.message, self.darken])
+            info = [None for _ in range(12)]
+            info[10] = True
+            info[11] = self.message
+            print(info)
+        elif type == "menu":
+            info = [None for _ in range(12)]
+            info[0] = self.getExtractedMap()
+            info[1] = self.getUnitMap()
+            info[3] = self.menuIndex
+            info[8] = self.getHeader()
+            info[10] = False
+            print(info)
         else:
-            print([self.getExtractedMap(), self.getUnitMap(), self.arrow, self.menuIndex, self.log, self.select, self.select_mode, self.selectIndex, self.header, self.top, self.message, self.darken])
+            print([self.getExtractedMap(), self.getUnitMap(), self.arrow, self.menuIndex, self.log, self.select, self.selectMode, self.selectIndex, self.header, self.top, self.darken, self.message])
 
     def listenKeyAction(self, type):
         if type == "message":
-            if input("type d") == "d":
+            keyAction = input("type d: ")
+            if keyAction == "d" or keyAction == "l":
                 pass
-            else:
+            elif keyAction == "s" or keyAction == "h":
                 if self.messageIndex != 0:
-                     self.messageIndex -= 2
+                    self.messageIndex -= 2
+                else:
+                    self.messageIndex -= 1
+            return keyAction
+        elif type == "menu":
+            keyAction = input("type j or k or s or d: ")
+            if keyAction == "j" and self.menuIndex != 0:
+                self.menuIndex -= 1
+            elif keyAction == "k" and self.menuIndex != 2:
+                self.menuIndex += 1
+            elif keyAction == "s":
+                self.currentMode.goBack(self)
+            elif keyAction == "d":
+                pass
 
     def sendMessage(self, message):
         type = "message"
@@ -108,4 +143,9 @@ class Model():
             self.messageIndex += 1
             self.sendMessage(message)
         else:
-            self.message = ["" for _ in range(6)]
+            self.messageIndex = 0
+
+    def sendMenu(self):
+        type = "menu"
+        self.sendInfo(type)
+        self.listenKeyAction(type)
