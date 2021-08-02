@@ -59,11 +59,15 @@ class View():
 
     def generateUnitMapLayer(self):
         unitMap = self.infoToDisplay[1]
+
         self.units = [[None for j in range(22)] for i in range(12)]
         if not unitMap is None:
             for i in range(11):
                 for j in range(22):
-                    self.units[i + 1][j] = Vector2(*groundDict[map[i][j]])
+                    if unitMap[i][j] is None:
+                        self.units[i + 1][j] = None
+                    else:
+                        self.units[i + 1][j] = Vector2(*unitsDict[unitMap[i][j]])
 
     def generateArrowLayer(self):
         arrow = self.infoToDisplay[2]
@@ -89,16 +93,16 @@ class View():
         if not menu is None:
             if menu == 0:
                 for i in range(5):
-                    self.logBackGround[10][j] = Vector2(*backGroundDict["オレンジ"])
-                    self.logBackGround[12][j] = Vector2(*backGroundDict["黒"])
+                    self.logBackGround[10][i] = Vector2(*backGroundDict["オレンジ"])
+                    self.logBackGround[11][i] = Vector2(*backGroundDict["黒"])
             else:
                 for i in range(5):
-                    self.logBackGround[12][j] = Vector2(*backGroundDict["オレンジ"])
-                    self.logBackGround[10][j] = Vector2(*backGroundDict["黒"])
-                for j in range(4):
-                    self.menu[10][j] = Vector2(*letterDict[dice[j]])
-                for j in range(3):
-                    self.menu[12][j] = Vector2(*letterDict[card[j]])
+                    self.logBackGround[11][i] = Vector2(*backGroundDict["オレンジ"])
+                    self.logBackGround[10][i] = Vector2(*backGroundDict["黒"])
+                for i in range(4):
+                    self.menu[10][i] = Vector2(*letterDict[dice[i]])
+                for i in range(3):
+                    self.menu[11][i] = Vector2(*letterDict[card[i]])
         else:
             pass
 
@@ -148,7 +152,7 @@ class View():
                 for j in range(22):
                     self.headerBackGround[i][j] = Vector2(*backGroundDict["黒"])
                 for j in range(len(header[i])):
-                    self.header[i][j] = Vector2(*letterDict[self.header[i][j]])
+                    self.header[i][j] = Vector2(*letterDict[header[i][j]])
         else:
             pass
 
@@ -166,19 +170,21 @@ class View():
 
     def generateMessageLayer(self):
         message = self.infoToDisplay[11]
-        if self.infoToDisplay[10]:
-            self.darken = [[Vector2(*backGroundDict["黒"]) for j in range(22)] for i in range(12)]
-        else:
-            self.darken = [[None for j in range(22)] for i in range(12)]
+        self.darken = [[None for j in range(22)] for i in range(12)]
         self.messageBackGround = [[None for j in range(22)] for i in range(12)]
         self.message = [[None for j in range(22)] for i in range(12)]
-        for i in range(6):
-            for j in range(12):
-                if self.darken:
-                    self.messageBackGround[3 + i][5 + j] = Vector2(*backGroundDict["オレンジ"])
-                else:
-                    self.messageBackGround[3 + i][5 + j] = Vector2(*backGroundDict["黒"])
-
+        if not message is None:
+            if self.infoToDisplay[10]:
+                self.darken = [[Vector2(*backGroundDict["黒"]) for j in range(22)] for i in range(12)]
+            for i in range(6):
+                for j in range(12):
+                    if self.darken:
+                        self.messageBackGround[3 + i][5 + j] = Vector2(*backGroundDict["オレンジ"])
+                    else:
+                        self.messageBackGround[3 + i][5 + j] = Vector2(*backGroundDict["黒"])
+            for i in range(len(message)):
+                for j in range(len(message[i])):
+                    self.message[3 + i][5 + j] = Vector2(*letterDict[message[i][j]])
 class Layer():
     def __init__(self, ui, imageFile, view, array):
         self.ui = ui
@@ -206,6 +212,7 @@ class Layer():
 
 class UserInterface():
     def __init__(self):
+
         pygame.init()
 
         # Game state
@@ -213,28 +220,6 @@ class UserInterface():
 
         # Rendering properties
         self.cellSize = Vector2(64,64)
-        '''
-        ここでレイヤーの順番を決めている
-        '''
-
-        self.layers = [
-            Layer(self,"TILES/MAP.png",self.view,self.view.ground),
-            Layer(self,"TILES/UNIT.png",self.view,self.view.units),
-            Layer(self,"TILES/ARROW.png",self.view,self.view.arrow),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.menuBackGround),
-            Layer(self,"TILES/LETTER.png",self.view,self.view.menu),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.logBackGround),
-            Layer(self,"TILES/LETTER.png",self.view,self.view.log),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.selectBackGround),
-            Layer(self,"TILES/LETTER.png",self.view,self.view.select),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.headerBackGround),
-            Layer(self,"TILES/LETTER.png",self.view,self.view.header),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.topBackGround),
-            Layer(self,"TILES/LETTER.png",self.view,self.view.top),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.darken),
-            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.messageBackGround),
-            Layer(self,"TILES/LETTER.png",self.view,self.view.message)
-        ]
 
         # Window
         windowSize = self.view.windowSize.elementwise() * self.cellSize
