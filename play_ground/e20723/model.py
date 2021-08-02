@@ -30,8 +30,8 @@ class Model():
         self.menuIndex = 0
         self.log = ["" for _ in range(3)]
         self.select = ["" for _ in range(6)]
-        self.selectMode = 2
-        self.selectIndex = 6
+        self.selectThreeOrSix = 0
+        self.selectIndex = 0
         self.header = ["" for _ in range(2)]
         self.top = ""
         self.darken = False
@@ -130,8 +130,16 @@ class Model():
             info[2] = user.getArrowDirection(user.coordinate)
             info[9] = user.name + " あと" + str(user.steps) + "ほ"
             print(info)
+        elif type == "select":
+            info = [None for _ in range(12)]
+            info[0] = self.getExtractedMap(user.coordinate)
+            info[1] = self.getUnitMap(user.coordinate)
+            info[5] = self.select
+            info[6] = self.selectThreeOrSix
+            info[7] = self.selectIndex
+
         else:
-            print([self.getExtractedMap(user.coordinate), self.getUnitMap(user.coordinate), self.arrow, self.menuIndex, self.log, self.select, self.selectMode, self.selectIndex, self.header, self.top, self.darken, self.message])
+            print([self.getExtractedMap(user.coordinate), self.getUnitMap(user.coordinate), self.arrow, self.menuIndex, self.log, self.select, self.selectThreeOrSix, self.selectIndex, self.header, self.top, self.darken, self.message])
 
     def listenKeyAction(self, type):
         if type == "message":
@@ -153,13 +161,40 @@ class Model():
             elif keyAction == "s":
                 self.currentMode.goBack(self)
             elif keyAction == "d":
+                self.menuIndex = 0
                 if self.menuIndex == 0:
                     self.currentMode = BeforeThrowingDice(self.currentMode)
                 elif self.menuIndex == 1:
                     '''
                     カードモード
                     '''
+                    self.currentMode = CardMode(self.currentMode)
+        elif type == "select":
+            '''
+            ここを実装中
+            '''
+            keyAction = input("type j or k or d: ")
+            if self.selectThreeOrSix == 0:
+                if keyAction == "j" and self.selectIndex != 0:
+                    self.selectIndex -= 1
+                elif keyAction == "k" and self.selectIndex != 2:
+                    self.selectIndex += 1
+                elif keyAction == "s":
+                    self.currentMode.goBack(self)
+                elif keyAction == "d":
+                    self.selectIndex = 0
+                    self.currentMode = BuyPropery(self.currentMode)
+            elif self.selectThreeOrSix == 1:
+                if keyAction == "j" and self.selectIndex != 0:
+                    self.selectIndex -= 1
+                elif keyAction == "k" and self.selectIndex != 5:
+                    self.selectIndex += 1
+                elif keyAction == "s":
+                    self.currentMode.goBack(self)
+                elif keyAction == "d":
                     pass
+                    #self.currentMode = BeforeThrowingDice(None)
+
         elif type == "log":
             keyAction = input("type s or d or h or l: ")
             if keyAction == "d" or keyAction == "l":
@@ -227,12 +262,15 @@ class Model():
             self.logIndex += 1
             self.sendLog(log, mode)
         else:
+            '''
+            モードの行き先
+            '''
             self.logIndex = 0
             if mode == "beforeThrowingDice":
                 self.currentMode = AfterThrowingDice(None)
             elif mode == "afterThrowingDice":
                 self.currentMode = Move(self.currentMode)
-            elif mode == "blueSquareMode" or mode == "redSquareMode"::
+            elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyPropery"]:
                 self.updateUserIndex()
                 self.currentMode =  Menu(None)
 
@@ -249,27 +287,41 @@ class Model():
             colorOfArrived = self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].color
             if colorOfArrived == "目駅":
                 '''
-                目的地モード
+                目的地モード -> 駅モード
                 '''
-                #self.currentMode = DesitinationSquareMode(None)
+                self.currentMode = DesitinationSquareMode(None)
                 pass
             elif colorOfArrived == "駅":
                 '''
                 駅モード
                 '''
-                #self.currentMode = StationSquareMode(None)
+                self.selectIndex = 0
+                self.selectThreeOrSix = 0
+                self.currentMode = StationSquareMode(None)
                 pass
             elif colorOfArrived == "青":
                 self.currentMode = BlueSquareMode(None)
 
             elif colorOfArrived == "赤":
-                '''
-                赤マスモード
-                '''
                 self.currentMode = RedSquareMode(None)
+
             elif colorOfArrived == "黄":
-                '''
-                黄マスモード
-                '''
-                #self.currentMode = YellowSquareMode(None)
-                pass
+                self.currentMode = YellowSquareMode(None)
+    def sendSelect(self):
+        type = "select"
+        user = self.users[self.userIndex]
+        index = 0
+        if selectThreeOrSix == 0:
+            for property in self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties:
+                self.select[i * 2] = property.name
+                secondRow = property.kanjiPrice() + " " +str(property.percentage) + "%"
+                if not property.owner is None:
+                    secondRow = secondRow + " " + property.owner
+                self.select[i * 2 + 1] = secondRow
+                index += 1
+        else:
+            for card in self.users[self.userIndex].cards:
+                self.select[index] = card.name
+                index += 1
+        self.sendInfo(type)
+        self.listenKeyAction(type)

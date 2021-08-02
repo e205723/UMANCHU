@@ -17,7 +17,7 @@ class User(Unit):
         #initialize a user's money with 1000
         self.money = 10000
         self.properties = []
-        self.cards = []
+        self.cards = [Card("きゅうこうカード")]
         self.steps = 0
         self.visitedSquares = []
 
@@ -25,16 +25,19 @@ class User(Unit):
         kanjiMoney = ""
         #値渡し
         num = self.money * 1
-        if num//100000000 > 0:
-            kanjiMoney += str(num//100000000) + "兆"
-            num = num % 100000000
-        if num//10000 > 0:
-            kanjiMoney += str(num//10000) + "億"
-            num = num % 10000
-        if num > 0:
-            kanjiMoney += str(num) + "万"
+        if num != 0:
+            if num//100000000 > 0:
+                kanjiMoney += str(num//100000000) + "兆"
+                num = num % 100000000
+            if num//10000 > 0:
+                kanjiMoney += str(num//10000) + "億"
+                num = num % 10000
+            if num > 0:
+                kanjiMoney += str(num) + "万"
 
-        kanjiMoney += "円"
+            kanjiMoney += "円"
+        else:
+            kanjiMoney = "0円"
 
         return kanjiMoney
 
@@ -66,8 +69,28 @@ class Property():
         self.owner = None
         self.station = None
 
+    def kanjiPrice(self):
+        kanjiPrice = ""
+        num = self.price * 1
+        if num != 0:
+            if num//100000000 > 0:
+                kanjiPrice += str(num//100000000) + "兆"
+                num = num % 100000000
+            if num//10000 > 0:
+                kanjiPrice += str(num//10000) + "億"
+                num = num % 10000
+            if num > 0:
+                kanjiPrice += str(num) + "万"
+
+            kanjiPrice += "円"
+        else:
+            kanjiPrice = "0円"
+
+        return kanjiPrice
+
+
 class Card():
-    def __init__(self, name, price):
+    def __init__(self, name):
         self.name = name
 
 class Square():
@@ -223,7 +246,7 @@ class Move(Mode):
     def flow(self, model):
         model.sendMove()
 
-class BlueSquareMode():
+class BlueSquareMode(Mode):
     def __init__(self, previous):
         super(BlueSquareMode, self).__init__(previous)
         self.mode = "blueSquareMode"
@@ -236,7 +259,7 @@ class BlueSquareMode():
         log = log.replace("$3", model.users[model.userIndex].kanjiMoney())
         model.sendLog(log, self.mode)
 
-class RedSquareMode():
+class RedSquareMode(Mode):
     def __init__(self, previous):
         super(RedSquareMode, self).__init__(previous)
         self.mode = "redSquareMode"
@@ -254,3 +277,58 @@ class RedSquareMode():
             log = log.replace("$3", model.users[model.userIndex].kanjiMoney())
 
         model.sendLog(log, self.mode)
+
+class YellowSquareMode(Mode):
+    def __init__(self, previous):
+        super(YellowSquareMode, self).__init__(previous)
+        self.mode = "yellowSquareMode"
+
+    def flow(self, model):
+        if len(model.users[model.userIndex].cards) == 6:
+            log = messages[6].replace("$", model.users[model.userIndex].name)
+        else:
+            newCard = Card(cards[randint(0,2)])
+            self.users[self.userIndex].cards.append(newCard)
+            log = messages[7].replace("$1", model.users[model.userIndex].name)
+            log = log.replace("$2", newCard.name)
+
+        model.sendLog(log, self.mode)
+
+class StationSquareMode(Mode):
+    def __init__(self, previous):
+        super(StationSquareMode, self).__init__(previous)
+        self.mode = "stationSquareMode"
+
+    def flow(self, model):
+        model.sendSelect()
+
+class BuyPropery(Mode):
+    def __init__(self, previous):
+        super(BuyPropery, self).__init__(previous)
+        self.mode = "buyPropery"
+
+    def flow(self, model):
+        user = model.users[model.userIndex]
+        property = model.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties[selectIndex]
+        log = ""
+        if property.owner is None:
+            if property.price > user.money:
+                log = messages[8].replace("$", property.name)
+            else:
+                log = messages[9].replace("$", property.name)
+                user.properties.append(property)
+                property.owner = user.name
+        else:
+            log = messages[10].replace("$1", property.owner)
+            log = log.replace("$2", property.name)
+        log += " おかいものをつづけたいばあいは s をおしてください。おわるばあいは d をおしてください"
+
+        model.sendLog(log, self.mode)
+
+class DesitinationSquareMode(Mode):
+    def __init__(self, previous):
+        super(DesitinationSquareMode).__init__(previous)
+        self.mode = desitinationSquareMode
+
+    def flow(self, model):
+        pass
