@@ -1,6 +1,7 @@
 from letterMap import letterMap
 from messages import messages
 from random import randint
+from cards import cardNames
 
 class Unit():
     def __init__(self, coordinate, direction):
@@ -20,7 +21,7 @@ class User(Unit):
         self.steps = 0
         self.visitedSquares = []
 
-    def kanijMoney(self):
+    def kanjiMoney(self):
         kanjiMoney = ""
         #値渡し
         num = self.money * 1
@@ -51,17 +52,6 @@ class User(Unit):
         for property in self.properties:
             sum += property.price
         return sum
-
-class Demerit(Unit):
-    def __init__(self, coordinate, direction):
-        super(Demerit, self).__init__(coordinate)
-        self.userToFollow = None
-
-    def takeMoney():
-        pass
-
-    def takeCards():
-        pass
 
 class Property():
     def __init__(self, name, price, percentage):
@@ -109,9 +99,6 @@ class BlueOrRedSquare(Square):
         super(BlueOrRedSquare, self).__init__(isAccessible, isStoppable, color)
         self.priceToAdd = priceToAdd
 
-    def operateMoney():
-        pass
-
 class StationSquare(Square):
     def __init__(self, isAccessible, isStoppable, color, name, coordinate, properties):
         super(StationSquare, self).__init__(isAccessible, isStoppable, color)
@@ -119,12 +106,6 @@ class StationSquare(Square):
         self.coordinate = coordinate
         self.properties = properties
         self.prize = None
-
-    def isBuyingUp():
-        pass
-
-    def listAffordable():
-        pass
 
 class CardSquare(Square):
     def __init__(self, isAccessible, isStoppable, color, cards):
@@ -170,9 +151,6 @@ class Map():
             return Square(False, False, greenSquares[randint(0,2)])
         elif letter == "水":
             return Square(False, False, letter)
-
-    def getAllPossiblePaths():
-        pass
 
 class Time():
     def __init__(self):
@@ -270,7 +248,7 @@ class RedSquareMode(Mode):
         self.mode = "redSquareMode"
 
     def flow(self, model):
-        minus = int(10000 * model.time.correntMonthlyCoefficient)
+        minus = int(10000 * 2 / model.time.correntMonthlyCoefficient)
         model.users[model.userIndex].money -= minus
         if model.users[model.userIndex].money < 0:
             model.users[model.userIndex].money = 0
@@ -292,8 +270,8 @@ class YellowSquareMode(Mode):
         if len(model.users[model.userIndex].cards) == 6:
             log = messages[6].replace("$", model.users[model.userIndex].name)
         else:
-            newCard = Card(cards[randint(0,2)])
-            self.users[self.userIndex].cards.append(newCard)
+            newCard = Card(cardNames[randint(0,2)])
+            model.users[self.userIndex].cards.append(newCard)
             log = messages[7].replace("$1", model.users[model.userIndex].name)
             log = log.replace("$2", newCard.name)
 
@@ -314,7 +292,7 @@ class BuyingPropery(Mode):
 
     def flow(self, model):
         user = model.users[model.userIndex]
-        property = model.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties[selectIndex]
+        property = model.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties[model.selectIndex]
         log = ""
         if property.owner is None:
             if property.price > user.money:
@@ -340,7 +318,7 @@ class DesitinationSquareMode(Mode):
         for property in model.destination.properties:
             prize += property.price
         model.users[model.userIndex].money += int(prize/3)
-        model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0].color = "駅"
+        model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "駅"
         destinationIndex = randint(0,67)
         distinationInfo = model.map.propertyInfo[destinationIndex]
         model.destination = model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
@@ -400,28 +378,3 @@ class Ending(Mode):
         message = messages[14].replace("$", str(model.users[max].getAllMoney()))
         message = message.replace("$2", str(model.users[max].name))
         model.sendMessage(message, self.mode)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #a

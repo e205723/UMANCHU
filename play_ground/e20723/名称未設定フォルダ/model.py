@@ -2,6 +2,8 @@ from propertyInfo import propertyInfo
 from gameObjects import *
 from random import randint
 
+keyactions = ["s", "d", "h", "j", "k", "l"]
+
 class Model():
     def __init__(self, UserIPList, userNameList):
         self.running = True
@@ -98,7 +100,7 @@ class Model():
                 self.arrow = 2
 
     def getHeader(self):
-        self.header[0] = self.users[self.userIndex].name + " " + self.users[self.userIndex].kanijMoney()
+        self.header[0] = self.users[self.userIndex].name + " " + self.users[self.userIndex].kanjiMoney()
         self.header[1] = self.getDistanceFromDestiny(self.users[self.userIndex].coordinate) + "、" + self.time.getTime()
 
     def sendInfo(self, type):
@@ -128,7 +130,7 @@ class Model():
             info = [None for _ in range(12)]
             info[0] = self.getExtractedMap(user.coordinate)
             info[1] = self.getUnitMap(user.coordinate)
-            info[2] = user.getArrowDirection(user.coordinate)
+            info[2] = self.getArrowDirection(user.coordinate)
             info[9] = user.name + " あと" + str(user.steps) + "ほ"
             print(info)
         elif type == "select":
@@ -138,13 +140,17 @@ class Model():
             info[5] = self.select
             info[6] = self.selectThreeOrSix
             info[7] = self.selectIndex
-
+            print(info)
         else:
             print([self.getExtractedMap(user.coordinate), self.getUnitMap(user.coordinate), self.arrow, self.menuIndex, self.log, self.select, self.selectThreeOrSix, self.selectIndex, self.header, self.top, self.darken, self.message])
 
     def listenKeyAction(self, type):
         if type == "message":
+            '''
             keyAction = input("type d: ")
+            '''
+            keyAction = keyactions[randint(0,5)]
+
             if keyAction == "d" or keyAction == "l":
                 pass
             elif keyAction == "s" or keyAction == "h":
@@ -154,7 +160,10 @@ class Model():
                     self.currentMode.goBack(self)
                     self.messageIndex -= 1
         elif type == "menu":
+            '''
             keyAction = input("type j or k or d: ")
+            '''
+            keyAction = keyactions[randint(0,5)]
             if keyAction == "j" and self.menuIndex != 0:
                 self.menuIndex -= 1
             elif keyAction == "k" and self.menuIndex != 1:
@@ -176,7 +185,10 @@ class Model():
                     else:
                         pass
         elif type == "select":
+            '''
             keyAction = input("type j or k or d: ")
+            '''
+            keyAction = keyactions[randint(0,5)]
             if self.selectThreeOrSix == 0:
                 if keyAction == "j" and self.selectIndex != 0:
                     self.selectIndex -= 1
@@ -199,7 +211,10 @@ class Model():
                     self.currentMode = UsingCard(None)
 
         elif type == "log":
+            '''
             keyAction = input("type s or d or h or l: ")
+            '''
+            keyAction = keyactions[randint(0,5)]
             if keyAction == "d" or keyAction == "l":
                 pass
             elif keyAction == "s" or keyAction == "h":
@@ -209,26 +224,29 @@ class Model():
                     self.currentMode.goBack(self)
                     self.logIndex -= 1
         elif type == "moving":
+            '''
             keyAction = input("type h or j or k or l:  ")
+            '''
+            keyAction = keyactions[randint(0,5)]
             user = self.users[self.userIndex]
 
             h = -3 * int(keyAction == "h")
             j = 3 * int(keyAction == "j")
-            k = = -3 * int(keyAction == "k")
+            k = -3 * int(keyAction == "k")
             l = 3 * int(keyAction == "l")
 
             if self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l].isStoppable:
-                if len(self.visitedSquares) == 0:
-                    self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
+                if len(user.visitedSquares) == 0:
+                    user.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                     user.steps -= 1
                 else:
-                    if self.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l]:
-                        self.visitedSquares.pop(-1)
+                    if user.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l]:
+                        user.visitedSquares.pop(-1)
                         user.steps += 1
                     else:
-                        self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
+                        user.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                         user.steps -= 1
-                self.unitMap[user.coordinate[1]][user.coordinate[0]].removing(str(self.userIndex) + user.direction)
+                self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
                 self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append(str(self.userIndex) + keyAction)
                 user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
                 user.direction = keyAction
@@ -253,8 +271,7 @@ class Model():
                 if self.time.hasReachedTheLimit():
                     self.currentMode = Ending(None)
             elif mode == "ending":
-                self.running False
-
+                self.running = False
 
     def sendMenu(self):
         type = "menu"
@@ -279,7 +296,7 @@ class Model():
                 self.currentMode = Moving(self.currentMode)
             elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyPropery"]:
                 self.updateUserIndex()
-                if seld.userIndex == 0:
+                if self.userIndex == 0:
                     self.time.update()
                     if self.time.isMarchOver():
                         self.currentMode = GettingSettlement(None)
@@ -316,13 +333,13 @@ class Model():
         user = self.users[self.userIndex]
         index = 0
         self.select = ["" for _ in range(6)]
-        if selectThreeOrSix == 0:
+        if self.selectThreeOrSix == 0:
             for property in self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties:
-                self.select[i * 2] = property.name
+                self.select[index * 2] = property.name
                 secondRow = property.kanjiPrice() + " " +str(property.percentage) + "%"
                 if not property.owner is None:
                     secondRow = secondRow + " " + property.owner
-                self.select[i * 2 + 1] = secondRow
+                self.select[index * 2 + 1] = secondRow
                 index += 1
         else:
             for card in self.users[self.userIndex].cards:
