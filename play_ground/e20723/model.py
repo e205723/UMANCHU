@@ -4,6 +4,7 @@ from random import randint
 
 class Model():
     def __init__(self, UserIPList, userNameList):
+        self.running = True
         self.users = [User(userIP, userName, order, [55, 11], 'k') for userIP, userName, order in zip(UserIPList, userNameList, range(4))]
         self.userIndex = 0
         self.time = Time()
@@ -38,7 +39,7 @@ class Model():
         self.message = ["" for _ in range(6)]
 
     def run(self):
-        while True:
+        while self.running:
             if  self.currentMode is None:
                 self.currentMode = Opening(None)
                 self.currentMode.flow(self)
@@ -123,7 +124,7 @@ class Model():
             info[8] = self.message
             info[10] = False
             print(info)
-        elif type == "move":
+        elif type == "moving":
             info = [None for _ in range(12)]
             info[0] = self.getExtractedMap(user.coordinate)
             info[1] = self.getUnitMap(user.coordinate)
@@ -175,9 +176,6 @@ class Model():
                     else:
                         pass
         elif type == "select":
-            '''
-            ここを実装中
-            '''
             keyAction = input("type j or k or d: ")
             if self.selectThreeOrSix == 0:
                 if keyAction == "j" and self.selectIndex != 0:
@@ -188,7 +186,7 @@ class Model():
                     self.currentMode.goBack(self)
                 elif keyAction == "d":
                     self.selectIndex = 0
-                    self.currentMode = BuyPropery(self.currentMode)
+                    self.currentMode = BuyingPropery(self.currentMode)
             elif self.selectThreeOrSix == 1:
                 if keyAction == "j" and self.selectIndex != 0:
                     self.selectIndex -= 1
@@ -198,7 +196,7 @@ class Model():
                     self.currentMode.goBack(self)
                 elif keyAction == "d":
                     pass
-                    self.currentMode = UseCard(None)
+                    self.currentMode = UsingCard(None)
 
         elif type == "log":
             keyAction = input("type s or d or h or l: ")
@@ -210,7 +208,7 @@ class Model():
                 else:
                     self.currentMode.goBack(self)
                     self.logIndex -= 1
-        elif type == "move":
+        elif type == "moving":
             keyAction = input("type h or j or k or l:  ")
             user = self.users[self.userIndex]
 
@@ -230,7 +228,7 @@ class Model():
                     else:
                         self.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                         user.steps -= 1
-                self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
+                self.unitMap[user.coordinate[1]][user.coordinate[0]].removing(str(self.userIndex) + user.direction)
                 self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append(str(self.userIndex) + keyAction)
                 user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
                 user.direction = keyAction
@@ -251,6 +249,12 @@ class Model():
                 self.currentMode = Menu(self.currentMode)
             elif mode == "desitinationSquareMode":
                 self.currentMode = StationSquareMode(None)
+            elif mode == "gettingSettlement":
+                if self.time.hasReachedTheLimit():
+                    self.currentMode = Ending(None)
+            elif mode == "ending":
+                self.running False
+
 
     def sendMenu(self):
         type = "menu"
@@ -268,27 +272,27 @@ class Model():
             self.logIndex += 1
             self.sendLog(log, mode)
         else:
-            '''
-            モードの行き先
-            '''
             self.logIndex = 0
             if mode == "beforeThrowingDice":
                 self.currentMode = AfterThrowingDice(None)
-            elif mode in ["afterThrowingDice", "useCard"]:
-                self.currentMode = Move(self.currentMode)
+            elif mode in ["afterThrowingDice", "usingCard"]:
+                self.currentMode = Moving(self.currentMode)
             elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyPropery"]:
                 self.updateUserIndex()
-                self.currentMode =  Menu(None)
+                if seld.userIndex == 0:
+                    self.time.update()
+                    if self.time.isMarchOver():
+                        self.currentMode = GettingSettlement(None)
+                    else:
+                        self.currentMode =  Menu(None)
+                else:
+                    self.currentMode =  Menu(None)
 
-    def sendMove(self):
-        type = "move"
+    def sendMoving(self):
+        type = "moving"
         while self.users[self.userIndex].steps != 0:
             self.sendInfo(type)
             self.listenKeyAction(type)
-        '''
-        じつはここではself.sendInfo(type)いらない
-        ここらへんでuserIndexをインクリメント
-        '''
         if self.users[self.userIndex].steps == 0:
             colorOfArrived = self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].color
             if colorOfArrived == "目駅":

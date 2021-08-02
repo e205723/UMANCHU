@@ -40,14 +40,17 @@ class User(Unit):
 
         return kanjiMoney
 
-    def throwDice():
-        pass
+    def calcSettlement(self):
+        sum = 0
+        for property in self.properties:
+            sum += property.getInterest()
+        return sum
 
-    def useCard():
-        pass
-
-    def buyProrerties():
-        pass
+    def getAllMoney(self):
+        sum = self.money
+        for property in self.properties:
+            sum += property.price
+        return sum
 
 class Demerit(Unit):
     def __init__(self, coordinate, direction):
@@ -67,6 +70,9 @@ class Property():
         self.percentage = percentage
         self.owner = None
         self.station = None
+
+    def getInterest(self):
+        return int(self.price * self.percentage / 100)
 
     def kanjiPrice(self):
         kanjiPrice = ""
@@ -237,13 +243,13 @@ class AfterThrowingDice(Mode):
         model.users[model.userIndex].steps = randint(1, 6)
         model.sendLog(messages[2].replace("$", str(model.users[model.userIndex].steps)), self.mode)
 
-class Move(Mode):
+class Moving(Mode):
     def __init__(self, previous):
-        super(Move, self).__init__(previous)
-        self.mode = "move"
+        super(Moving, self).__init__(previous)
+        self.mode = "moving"
 
     def flow(self, model):
-        model.sendMove()
+        model.sendMoving()
 
 class BlueSquareMode(Mode):
     def __init__(self, previous):
@@ -301,10 +307,10 @@ class StationSquareMode(Mode):
     def flow(self, model):
         model.sendSelect()
 
-class BuyPropery(Mode):
+class BuyingPropery(Mode):
     def __init__(self, previous):
-        super(BuyPropery, self).__init__(previous)
-        self.mode = "buyPropery"
+        super(BuyingPropery, self).__init__(previous)
+        self.mode = "buyingPropery"
 
     def flow(self, model):
         user = model.users[model.userIndex]
@@ -352,10 +358,10 @@ class CardMode(Mode):
     def flow(self, model):
         model.sendSelect()
 
-class UseCard(Mode):
+class UsingCard(Mode):
     def __init__(self, previous):
-        super(UseCard).__init__(previous)
-        self.mode = "useCard"
+        super(UsingCard).__init__(previous)
+        self.mode = "usingCard"
 
     def flow(self, model):
         cardname = model.users[model.userIndex].cards[self.selectIndex]
@@ -364,3 +370,58 @@ class UseCard(Mode):
         log = messages[12].replace("$1", cardname)
         log = log.replace("$2", str(model.users[model.userIndex].steps))
         model.sendLog(log, self.mode)
+
+class GettingSettlement(Mode):
+    def __init__(self, previous):
+        super(GettingSettlement).__init__(previous)
+        self.mode = "gettingSettlement"
+
+    def flow(self, model):
+
+        message = "けっさんです!けっさんです!けっさんです!!!!!"
+        for user in model.users:
+            user.money += user.calcSettlement()
+            temp = messages[13].replace("$1", user.name)
+            temp = messages[13].replace("$2", str(user.calcSettlement()))
+            message += temp
+
+        model.sendMessage(message, self.mode)
+
+class Ending(Mode):
+    def __init__(self, previous):
+        super(Ending).__init__(previous)
+        self.mode = "ending"
+
+    def flow(self, model):
+        max = 0
+        for i in range(4):
+            if model.users[i].getAllMoney() > model.users[i].getAllMoney():
+                max = i
+        message = messages[14].replace("$", str(model.users[max].getAllMoney()))
+        message = message.replace("$2", str(model.users[max].name))
+        model.sendMessage(message, self.mode)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #a
