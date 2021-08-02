@@ -1,7 +1,6 @@
 from letterMap import letterMap
 from messages import messages
 from random import randint
-import copy
 
 class Unit():
     def __init__(self, coordinate, direction):
@@ -328,7 +327,40 @@ class BuyPropery(Mode):
 class DesitinationSquareMode(Mode):
     def __init__(self, previous):
         super(DesitinationSquareMode).__init__(previous)
-        self.mode = desitinationSquareMode
+        self.mode = "desitinationSquareMode"
 
     def flow(self, model):
-        pass
+        prize = 0
+        for property in model.destination.properties:
+            prize += property.price
+        model.users[model.userIndex].money += int(prize/3)
+        model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0].color = "駅"
+        destinationIndex = randint(0,67)
+        distinationInfo = model.map.propertyInfo[destinationIndex]
+        model.destination = model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
+        model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "目駅"
+        message = messages.replace("$1", model.users[model.userIndex].name)
+        message = message.replace("$2", str(prize))
+        message = message.replace("$3", model.destination.name)
+        model.sendMessage(message, self.mode)
+
+class CardMode(Mode):
+    def __init__(self, previous):
+        super(CardMode).__init__(previous)
+        self.mode = "cardMode"
+
+    def flow(self, model):
+        model.sendSelect()
+
+class UseCard(Mode):
+    def __init__(self, previous):
+        super(UseCard).__init__(previous)
+        self.mode = "useCard"
+
+    def flow(self, model):
+        cardname = model.users[model.userIndex].cards[self.selectIndex]
+        dice = cardNames.index(cardname)
+        model.users[model.userIndex].steps = randint(1 * (dice + 2), 6 * (dice + 2))
+        log = messages[12].replace("$1", cardname)
+        log = log.replace("$2", str(model.users[model.userIndex].steps))
+        model.sendLog(log, self.mode)

@@ -165,10 +165,15 @@ class Model():
                 if self.menuIndex == 0:
                     self.currentMode = BeforeThrowingDice(self.currentMode)
                 elif self.menuIndex == 1:
-                    '''
-                    カードモード
-                    '''
-                    self.currentMode = CardMode(self.currentMode)
+                    if len(self.users[self.userIndex].cards) != 0:
+                        '''
+                        カードモード
+                        '''
+                        self.selectIndex = 0
+                        self.selectThreeOrSix = 1
+                        self.currentMode = CardMode(self.currentMode)
+                    else:
+                        pass
         elif type == "select":
             '''
             ここを実装中
@@ -177,7 +182,7 @@ class Model():
             if self.selectThreeOrSix == 0:
                 if keyAction == "j" and self.selectIndex != 0:
                     self.selectIndex -= 1
-                elif keyAction == "k" and self.selectIndex != 2:
+                elif keyAction == "k" and self.selectIndex != len(self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].properties) - 1:
                     self.selectIndex += 1
                 elif keyAction == "s":
                     self.currentMode.goBack(self)
@@ -187,13 +192,13 @@ class Model():
             elif self.selectThreeOrSix == 1:
                 if keyAction == "j" and self.selectIndex != 0:
                     self.selectIndex -= 1
-                elif keyAction == "k" and self.selectIndex != 5:
+                elif keyAction == "k" and self.selectIndex != len(self.users[self.userIndex].cards) - 1:
                     self.selectIndex += 1
                 elif keyAction == "s":
                     self.currentMode.goBack(self)
                 elif keyAction == "d":
                     pass
-                    #self.currentMode = BeforeThrowingDice(None)
+                    self.currentMode = UseCard(None)
 
         elif type == "log":
             keyAction = input("type s or d or h or l: ")
@@ -232,7 +237,6 @@ class Model():
 
     def sendMessage(self, message, mode):
         type = "message"
-
         for i in range(6):
             self.message[i] = message[self.messageIndex * 72 + i * 12: self.messageIndex * 72 + (i + 1) * 12]
         self.sendInfo(type)
@@ -245,6 +249,8 @@ class Model():
             self.messageIndex = 0
             if mode == "opening":
                 self.currentMode = Menu(self.currentMode)
+            elif mode == "desitinationSquareMode":
+                self.currentMode = StationSquareMode(None)
 
     def sendMenu(self):
         type = "menu"
@@ -268,7 +274,7 @@ class Model():
             self.logIndex = 0
             if mode == "beforeThrowingDice":
                 self.currentMode = AfterThrowingDice(None)
-            elif mode == "afterThrowingDice":
+            elif mode in ["afterThrowingDice", "useCard"]:
                 self.currentMode = Move(self.currentMode)
             elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyPropery"]:
                 self.updateUserIndex()
@@ -286,15 +292,9 @@ class Model():
         if self.users[self.userIndex].steps == 0:
             colorOfArrived = self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].color
             if colorOfArrived == "目駅":
-                '''
-                目的地モード -> 駅モード
-                '''
                 self.currentMode = DesitinationSquareMode(None)
                 pass
             elif colorOfArrived == "駅":
-                '''
-                駅モード
-                '''
                 self.selectIndex = 0
                 self.selectThreeOrSix = 0
                 self.currentMode = StationSquareMode(None)
@@ -311,6 +311,7 @@ class Model():
         type = "select"
         user = self.users[self.userIndex]
         index = 0
+        self.select = ["" for _ in range(6)]
         if selectThreeOrSix == 0:
             for property in self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties:
                 self.select[i * 2] = property.name
