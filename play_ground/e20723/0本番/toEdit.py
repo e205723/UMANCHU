@@ -93,16 +93,16 @@ class View():
         if not menu is None:
             if menu == 0:
                 for i in range(5):
-                    self.logBackGround[10][i] = Vector2(*backGroundDict["オレンジ"])
-                    self.logBackGround[11][i] = Vector2(*backGroundDict["黒"])
+                    self.menuBackGround[10][i] = Vector2(*backGroundDict["オレンジ"])
+                    self.menuBackGround[11][i] = Vector2(*backGroundDict["黒"])
             else:
                 for i in range(5):
-                    self.logBackGround[11][i] = Vector2(*backGroundDict["オレンジ"])
-                    self.logBackGround[10][i] = Vector2(*backGroundDict["黒"])
-                for i in range(4):
-                    self.menu[10][i] = Vector2(*letterDict[dice[i]])
-                for i in range(3):
-                    self.menu[11][i] = Vector2(*letterDict[card[i]])
+                    self.menuBackGround[11][i] = Vector2(*backGroundDict["オレンジ"])
+                    self.menuBackGround[10][i] = Vector2(*backGroundDict["黒"])
+            for i in range(4):
+                self.menu[10][i] = Vector2(*letterDict[dice[i]])
+            for i in range(3):
+                self.menu[11][i] = Vector2(*letterDict[card[i]])
         else:
             pass
 
@@ -117,7 +117,9 @@ class View():
             for i in range(3):
                 for j in range(17):
                     self.logBackGround[9 + i][j] = Vector2(*backGroundDict["黒"])
-                    self.log[9 + i][j] = Vector2(*letterDict[[log[i][j]]])
+            for i in range(len(log)):
+                for j in range(len(log[i])):
+                    self.log[9 + i][j] = Vector2(*letterDict[log[i][j]])
         else:
             pass
 
@@ -164,7 +166,7 @@ class View():
             for i in range(22):
                 self.topBackGround[0][i] = Vector2(*backGroundDict["黒"])
             for i in range(len(top)):
-                self.top[0][i] = Vector2(*letterDict[self.top[0][i]])
+                self.top[0][i] = Vector2(*letterDict[top[i]])
         else:
             pass
 
@@ -253,7 +255,6 @@ class UserInterface():
                         break
                     conn.sendall(pickle.dumps(""))
                     self.view.infoToDisplay = pickle.loads(data)
-        print(self.view.infoToDisplay)
 
     def sendOrder(self, order):
         HOST = socket.gethostbyname(socket.gethostname())
@@ -303,7 +304,6 @@ class UserInterface():
 
     def render(self):
         self.window.fill((0,0,0))
-        print(self.window)
         for layer in self.layers:
             layer.render(self.window)
 

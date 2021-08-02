@@ -176,14 +176,13 @@ class Model():
                     self.messageIndex -= 1
         elif type == "menu":
             keyAction = self.listen()
-            if keyAction == "j" and self.menuIndex != 0:
-                self.menuIndex -= 1
-            elif keyAction == "k" and self.menuIndex != 1:
-                self.menuIndex += 1
+            if keyAction == "j":
+                self.menuIndex = 0
+            elif keyAction == "k":
+                self.menuIndex = 1
             elif keyAction == "s":
                 self.currentMode.goBack(self)
             elif keyAction == "d":
-                self.menuIndex = 0
                 if self.menuIndex == 0:
                     self.currentMode = BeforeThrowingDice(self.currentMode)
                 elif self.menuIndex == 1:
@@ -264,7 +263,7 @@ class Model():
         else:
             self.messageIndex = 0
             if mode == "opening":
-                self.currentMode = Menu(self.currentMode)
+                self.currentMode = Menu(None)
             elif mode == "desitinationSquareMode":
                 self.currentMode = StationSquareMode(None)
             elif mode == "gettingSettlement":
