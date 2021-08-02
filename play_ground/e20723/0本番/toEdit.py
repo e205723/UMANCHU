@@ -74,13 +74,13 @@ class View():
         self.arrow = [[None for j in range(22)] for i in range(12)]
         if not arrow is None:
             if arrow == 0:
-                self.arrow[5][13] = Vector2(*arrowDict[0])
+                self.arrow[5][13] = Vector2(*arrowDict["0"])
             elif arrow == 1:
-                self.arrow[6][12] = Vector2(*arrowDict[0])
+                self.arrow[6][12] = Vector2(*arrowDict["1"])
             elif arrow == 2:
-                self.arrow[7][13] = Vector2(*arrowDict[0])
+                self.arrow[7][13] = Vector2(*arrowDict["2"])
             elif arrow == 3:
-                self.arrow[6][14] = Vector2(*arrowDict[0])
+                self.arrow[6][14] = Vector2(*arrowDict["3"])
         else:
             pass
 
@@ -136,12 +136,15 @@ class View():
                     self.selectBackGround[2 + i][5 + j] = Vector2(*backGroundDict["黒"])
             for i in range(6):
                 for j in range(len(select[i])):
-                    self.select[2 + i][5 + j] = Vector2(*letterDict[select[i][j]])
+                    if 17 > j:
+                        self.select[2 + i][5 + j] = Vector2(*letterDict[select[i][j]])
             if self.infoToDisplay[6] == 0:
-                pass
+                for i in range(2):
+                    for j in range(17):
+                        self.selectBackGround[2 + self.infoToDisplay[7]*2 + i][5 + j] = Vector2(*backGroundDict["オレンジ"])
             else:
                 for i in range(17):
-                    self.selectBackGround[2 + self.infoToDisplay[7]][5 + j] = Vector2(*backGroundDict["オレンジ"])
+                    self.selectBackGround[2 + self.infoToDisplay[7]][5 + i] = Vector2(*backGroundDict["オレンジ"])
         else:
             pass
 
@@ -166,7 +169,8 @@ class View():
             for i in range(22):
                 self.topBackGround[0][i] = Vector2(*backGroundDict["黒"])
             for i in range(len(top)):
-                self.top[0][i] = Vector2(*letterDict[top[i]])
+                if i < 22:
+                    self.top[0][i] = Vector2(*letterDict[top[i]])
         else:
             pass
 

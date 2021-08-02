@@ -21,26 +21,6 @@ class User(Unit):
         self.steps = 0
         self.visitedSquares = []
 
-    def kanjiMoney(self):
-        kanjiMoney = ""
-        #値渡し
-        num = self.money * 1
-        if num != 0:
-            if num//100000000 > 0:
-                kanjiMoney += str(num//100000000) + "兆"
-                num = num % 100000000
-            if num//10000 > 0:
-                kanjiMoney += str(num//10000) + "億"
-                num = num % 10000
-            if num > 0:
-                kanjiMoney += str(num) + "万"
-
-            kanjiMoney += "円"
-        else:
-            kanjiMoney = "0円"
-
-        return kanjiMoney
-
     def calcSettlement(self):
         sum = 0
         for property in self.properties:
@@ -63,25 +43,6 @@ class Property():
 
     def getInterest(self):
         return int(self.price * self.percentage / 100)
-
-    def kanjiPrice(self):
-        kanjiPrice = ""
-        num = self.price * 1
-        if num != 0:
-            if num//100000000 > 0:
-                kanjiPrice += str(num//100000000) + "兆"
-                num = num % 100000000
-            if num//10000 > 0:
-                kanjiPrice += str(num//10000) + "億"
-                num = num % 10000
-            if num > 0:
-                kanjiPrice += str(num) + "万"
-
-            kanjiPrice += "円"
-        else:
-            kanjiPrice = "0円"
-
-        return kanjiPrice
 
 
 class Card():
@@ -110,11 +71,6 @@ class StationSquare(Square):
 class CardSquare(Square):
     def __init__(self, isAccessible, isStoppable, color, cards):
         super(CardSquare, self).__init__(isAccessible, isStoppable, color)
-        self.cards = cards
-
-class CardMarketSquare(Square):
-    def __init__(self, isAccessible, isStoppable, color, cards):
-        super(CardMarketSquare, self).__init__(isAccessible, isStoppable, color)
         self.cards = cards
 
 class NatureSquare(Square):
@@ -158,7 +114,7 @@ class Time():
         self.monthlyCoefficeints = [0, 0.5, 0.6, 0.9, 1.0, 1.3, 1.6, 1.9, 2, 1.8, 1.2, 0.8, 0.4]
         self.correntMonthlyCoefficient = 1.0
         self.year = 1
-        self.limit = 4
+        self.limit = 1
 
     def getTime(self):
         return str(self.year) + "年目" + str(self.month) + "月"
@@ -166,7 +122,7 @@ class Time():
     def update(self):
         self.month += 1
         if self.month == 13:
-            self.mongth = 1
+            self.month = 1
             self.correntMonthlyCoefficient = self.monthlyCoefficeints[self.month]
             self.year += 1
 
@@ -174,7 +130,7 @@ class Time():
         return self.year == self.limit + 1
 
     def isMarchOver(self):
-        return self.mangth == 4
+        return self.month == 4
 
 class Mode():
     def __init__(self, previous):
@@ -238,8 +194,8 @@ class BlueSquareMode(Mode):
         plus = int(10000 * model.time.correntMonthlyCoefficient)
         model.users[model.userIndex].money += plus
         log = messages[3].replace("$1", model.users[model.userIndex].name)
-        log = log.replace("$2", str(plus))
-        log = log.replace("$3", model.users[model.userIndex].kanjiMoney())
+        log = log.replace("$2", model.kanjiMoney(plus))
+        log = log.replace("$3", model.kanjiMoney(model.users[model.userIndex].money))
         model.sendLog(log, self.mode)
 
 class RedSquareMode(Mode):
@@ -252,12 +208,12 @@ class RedSquareMode(Mode):
         model.users[model.userIndex].money -= minus
         if model.users[model.userIndex].money < 0:
             model.users[model.userIndex].money = 0
-            log = messages[3].replace("$1", model.users[model.userIndex].name)
-            log = log.replace("$2", str(-minus))
-        else:
             log = messages[4].replace("$1", model.users[model.userIndex].name)
-            log = log.replace("$2", str(-minus))
-            log = log.replace("$3", model.users[model.userIndex].kanjiMoney())
+            log = log.replace("$2", model.kanjiMoney(minus))
+        else:
+            log = messages[5].replace("$1", model.users[model.userIndex].name)
+            log = log.replace("$2", model.kanjiMoney(minus))
+            log = log.replace("$3", model.kanjiMoney(model.users[model.userIndex].money))
 
         model.sendLog(log, self.mode)
 
@@ -271,7 +227,7 @@ class YellowSquareMode(Mode):
             log = messages[6].replace("$", model.users[model.userIndex].name)
         else:
             newCard = Card(cardNames[randint(0,2)])
-            model.users[self.userIndex].cards.append(newCard)
+            model.users[model.userIndex].cards.append(newCard)
             log = messages[7].replace("$1", model.users[model.userIndex].name)
             log = log.replace("$2", newCard.name)
 
@@ -304,13 +260,13 @@ class BuyingPropery(Mode):
         else:
             log = messages[10].replace("$1", property.owner)
             log = log.replace("$2", property.name)
-        log += " おかいものをつづけたいばあいは s をおしてください。おわるばあいは d をおしてください"
+        log += " d をおしてください"
 
         model.sendLog(log, self.mode)
 
 class DesitinationSquareMode(Mode):
     def __init__(self, previous):
-        super(DesitinationSquareMode).__init__(previous)
+        super(DesitinationSquareMode, self).__init__(previous)
         self.mode = "desitinationSquareMode"
 
     def flow(self, model):
@@ -323,14 +279,14 @@ class DesitinationSquareMode(Mode):
         distinationInfo = model.map.propertyInfo[destinationIndex]
         model.destination = model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
         model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "目駅"
-        message = messages.replace("$1", model.users[model.userIndex].name)
+        message = messages[11].replace("$1", model.users[model.userIndex].name)
         message = message.replace("$2", str(prize))
         message = message.replace("$3", model.destination.name)
         model.sendMessage(message, self.mode)
 
 class CardMode(Mode):
     def __init__(self, previous):
-        super(CardMode).__init__(previous)
+        super(CardMode, self).__init__(previous)
         self.mode = "cardMode"
 
     def flow(self, model):
@@ -338,11 +294,11 @@ class CardMode(Mode):
 
 class UsingCard(Mode):
     def __init__(self, previous):
-        super(UsingCard).__init__(previous)
+        super(UsingCard, self).__init__(previous)
         self.mode = "usingCard"
 
     def flow(self, model):
-        cardname = model.users[model.userIndex].cards[self.selectIndex]
+        cardname = model.users[model.userIndex].cards.pop(model.selectIndex).name
         dice = cardNames.index(cardname)
         model.users[model.userIndex].steps = randint(1 * (dice + 2), 6 * (dice + 2))
         log = messages[12].replace("$1", cardname)
@@ -351,7 +307,7 @@ class UsingCard(Mode):
 
 class GettingSettlement(Mode):
     def __init__(self, previous):
-        super(GettingSettlement).__init__(previous)
+        super(GettingSettlement, self).__init__(previous)
         self.mode = "gettingSettlement"
 
     def flow(self, model):
@@ -367,7 +323,7 @@ class GettingSettlement(Mode):
 
 class Ending(Mode):
     def __init__(self, previous):
-        super(Ending).__init__(previous)
+        super(Ending, self).__init__(previous)
         self.mode = "ending"
 
     def flow(self, model):
@@ -375,6 +331,6 @@ class Ending(Mode):
         for i in range(4):
             if model.users[i].getAllMoney() > model.users[i].getAllMoney():
                 max = i
-        message = messages[14].replace("$", str(model.users[max].getAllMoney()))
+        message = messages[14].replace("$1", model.kanjiMoney(model.users[max].getAllMoney()))
         message = message.replace("$2", str(model.users[max].name))
         model.sendMessage(message, self.mode)

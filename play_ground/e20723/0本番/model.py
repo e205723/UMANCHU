@@ -55,7 +55,7 @@ class Model():
                     conn.sendall(pickle.dumps(""))
                     loadedData = pickle.loads(data)
                     if loadedData[0] == self.users[self.userIndex].ip:
-                        sleep(1)
+                        sleep(0.3)
                         return loadedData[1]
 
     def send(self, info):
@@ -109,6 +109,25 @@ class Model():
 
         return result
 
+    def kanjiMoney(self, money):
+        kanjiMoney = ""
+        num = money * 1
+        if num != 0:
+            if num//100000000 > 0:
+                kanjiMoney += str(num//100000000) + "兆"
+                num = num % 100000000
+            if num//10000 > 0:
+                kanjiMoney += str(num//10000) + "億"
+                num = num % 10000
+            if num > 0:
+                kanjiMoney += str(num) + "万"
+
+            kanjiMoney += "円"
+        else:
+            kanjiMoney = "0円"
+
+        return kanjiMoney
+
     def getExtractedMap(self, coordinate):
         return [[self.map.squaresMatrix[coordinate[1] + i - 5][coordinate[0] + j - 13].color for j in range(22)] for i in range(11)]
 
@@ -120,17 +139,17 @@ class Model():
         verticalDistance = (coordinate[1] - self.destination.coordinate[1])
         if horizontlDistance**2 >= verticalDistance**2:
             if horizontlDistance > 0:
-                self.arrow = 1
+                return 1
             else:
-                self.arrow = 3
+                return  3
         else:
             if verticalDistance > 0:
-                self.arrow = 0
+                return  0
             else:
-                self.arrow = 2
+                return 2
 
     def getHeader(self):
-        self.header[0] = self.users[self.userIndex].name + " " + self.users[self.userIndex].kanjiMoney()
+        self.header[0] = self.users[self.userIndex].name + " " + self.kanjiMoney(self.users[self.userIndex].money)
         self.header[1] = self.getDistanceFromDestiny(self.users[self.userIndex].coordinate) + "、" + self.time.getTime()
 
     def sendInfo(self, type):
@@ -153,7 +172,10 @@ class Model():
             info[0] = self.getExtractedMap(user.coordinate)
             info[1] = self.getUnitMap(user.coordinate)
             info[2] = self.getArrowDirection(user.coordinate)
+
             info[9] = user.name + " あと" + str(user.steps) + "ほ"
+            if "駅" in self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].color:
+                info[9] += " ここは" + self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].name
         elif type == "select":
             info[0] = self.getExtractedMap(user.coordinate)
             info[1] = self.getUnitMap(user.coordinate)
@@ -177,9 +199,9 @@ class Model():
         elif type == "menu":
             keyAction = self.listen()
             if keyAction == "j":
-                self.menuIndex = 0
-            elif keyAction == "k":
                 self.menuIndex = 1
+            elif keyAction == "k":
+                self.menuIndex = 0
             elif keyAction == "s":
                 self.currentMode.goBack(self)
             elif keyAction == "d":
@@ -195,24 +217,23 @@ class Model():
         elif type == "select":
             keyAction = self.listen()
             if self.selectThreeOrSix == 0:
-                if keyAction == "j" and self.selectIndex != 0:
-                    self.selectIndex -= 1
-                elif keyAction == "k" and self.selectIndex != len(self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].properties) - 1:
+                if keyAction == "j" and self.selectIndex != len(self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].properties) - 1:
                     self.selectIndex += 1
+                elif keyAction == "k" and self.selectIndex != 0:
+                    self.selectIndex -= 1
                 elif keyAction == "s":
                     self.currentMode.goBack(self)
                 elif keyAction == "d":
                     self.selectIndex = 0
                     self.currentMode = BuyingPropery(self.currentMode)
             elif self.selectThreeOrSix == 1:
-                if keyAction == "j" and self.selectIndex != 0:
-                    self.selectIndex -= 1
-                elif keyAction == "k" and self.selectIndex != len(self.users[self.userIndex].cards) - 1:
+                if keyAction == "j" and self.selectIndex != len(self.users[self.userIndex].cards) - 1:
                     self.selectIndex += 1
+                elif keyAction == "k" and self.selectIndex != 0:
+                    self.selectIndex -= 1
                 elif keyAction == "s":
                     self.currentMode.goBack(self)
                 elif keyAction == "d":
-                    pass
                     self.currentMode = UsingCard(None)
 
         elif type == "log":
@@ -234,7 +255,12 @@ class Model():
             k = -3 * int(keyAction == "k")
             l = 3 * int(keyAction == "l")
 
-            if self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l].isStoppable:
+            h2 = -1 * int(keyAction == "h")
+            j2 = int(keyAction == "j")
+            k2 = -1 * int(keyAction == "k")
+            l2 = int(keyAction == "l")
+
+            if keyAction in "hjkl" and self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l].isStoppable and self.map.squaresMatrix[user.coordinate[1] + j2 + k2][user.coordinate[0] + h2 + l2].isAccessible:
                 if len(user.visitedSquares) == 0:
                     user.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                     user.steps -= 1
@@ -246,6 +272,8 @@ class Model():
                         user.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
                         user.steps -= 1
                 self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
+                if not keyAction in "ghjk":
+                    keyAction = "k"
                 self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append(str(self.userIndex) + keyAction)
                 user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
                 user.direction = keyAction
@@ -265,10 +293,13 @@ class Model():
             if mode == "opening":
                 self.currentMode = Menu(None)
             elif mode == "desitinationSquareMode":
-                self.currentMode = StationSquareMode(None)
+                self.currentMode = BuyingPropery(None)
             elif mode == "gettingSettlement":
                 if self.time.hasReachedTheLimit():
                     self.currentMode = Ending(None)
+                else:
+                    self.updateUserIndex()
+                    self.currentMode = Menu(None)
             elif mode == "ending":
                 self.running = False
 
@@ -293,7 +324,8 @@ class Model():
                 self.currentMode = AfterThrowingDice(None)
             elif mode in ["afterThrowingDice", "usingCard"]:
                 self.currentMode = Moving(self.currentMode)
-            elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyPropery"]:
+            elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyingPropery"]:
+                self.users[self.userIndex].visitedSquares = []
                 self.updateUserIndex()
                 if self.userIndex == 0:
                     self.time.update()
@@ -336,7 +368,7 @@ class Model():
         if self.selectThreeOrSix == 0:
             for property in self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].properties:
                 self.select[index * 2] = property.name
-                secondRow = property.kanjiPrice() + " " +str(property.percentage) + "%"
+                secondRow = self.kanjiMoney(property.price) + " " +str(property.percentage) + "%"
                 if not property.owner is None:
                     secondRow = secondRow + " " + property.owner
                 self.select[index * 2 + 1] = secondRow
