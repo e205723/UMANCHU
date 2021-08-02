@@ -13,22 +13,22 @@ class View():
     def __init__(self):
         self.infoToDisplay = None
         self.windowSize = Vector2(22,12)
-        self.ground = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.units = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.arrow = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.menuBackGround = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.menu = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.logBackGround = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.log = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.selectBackGround = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.select = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.headerBackGround = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.header = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.topBackGround = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.top = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.darken = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.messageBackGround = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
-        self.message = [[Vector2(*groundDict["草"]) for i in range(22)] for j in range(12)]
+        self.ground = [[None for i in range(22)] for j in range(12)]
+        self.units = [[None for i in range(22)] for j in range(12)]
+        self.arrow = [[None for i in range(22)] for j in range(12)]
+        self.menuBackGround = [[None for i in range(22)] for j in range(12)]
+        self.menu = [[None for i in range(22)] for j in range(12)]
+        self.logBackGround = [[None for i in range(22)] for j in range(12)]
+        self.log = [[None for i in range(22)] for j in range(12)]
+        self.selectBackGround = [[None for i in range(22)] for j in range(12)]
+        self.select = [[None for i in range(22)] for j in range(12)]
+        self.headerBackGround = [[None for i in range(22)] for j in range(12)]
+        self.header = [[None for i in range(22)] for j in range(12)]
+        self.topBackGround = [[None for i in range(22)] for j in range(12)]
+        self.top = [[None for i in range(22)] for j in range(12)]
+        self.darken = [[None for i in range(22)] for j in range(12)]
+        self.messageBackGround = [[None for i in range(22)] for j in range(12)]
+        self.message = [[None for i in range(22)] for j in range(12)]
 
     @property
     def worldWidth(self):
@@ -51,22 +51,24 @@ class View():
 
     def generateMapLayer(self):
         map = self.infoToDisplay[0]
+        self.ground = [[None for j in range(22)] for i in range(12)]
         if not map is None:
-            self.ground = [[Vector2(*groundDict[map[i][j]]) for j in range(22)] for i in range(11)]
-        else:
-            self.ground = [[None for j in range(22)] for i in range(11)]
+            for i in range(11):
+                for j in range(22):
+                    self.ground[i + 1][j] = Vector2(*groundDict[map[i][j]])
 
     def generateUnitMapLayer(self):
         unitMap = self.infoToDisplay[1]
-        if not map is None:
-            self.units = [[Vector2(*unitsDict[unitMap[i][j]]) for j in range(22)] for i in range(11)]
-        else:
-            self.units = [[None for j in range(22)] for i in range(11)]
+        self.units = [[None for j in range(22)] for i in range(12)]
+        if not unitMap is None:
+            for i in range(11):
+                for j in range(22):
+                    self.units[i + 1][j] = Vector2(*groundDict[map[i][j]])
 
     def generateArrowLayer(self):
         arrow = self.infoToDisplay[2]
-        self.arrow = [[None for j in range(22)] for i in range(11)]
-        if not map is None:
+        self.arrow = [[None for j in range(22)] for i in range(12)]
+        if not arrow is None:
             if arrow == 0:
                 self.arrow[5][13] = Vector2(*arrowDict[0])
             elif arrow == 1:
@@ -80,23 +82,23 @@ class View():
 
     def generateMenuLayer(self):
         menu = self.infoToDisplay[3]
-        self.menuBackGround = [[None for j in range(22)] for i in range(11)]
-        self.menu = [[None for j in range(22)] for i in range(11)]
+        self.menuBackGround = [[None for j in range(22)] for i in range(12)]
+        self.menu = [[None for j in range(22)] for i in range(12)]
         dice = "サイコロ"
         card = "カード"
         if not menu is None:
             if menu == 0:
                 for i in range(5):
                     self.logBackGround[10][j] = Vector2(*backGroundDict["オレンジ"])
-                    self.logBackGround[11][j] = Vector2(*backGroundDict["黒"])
+                    self.logBackGround[12][j] = Vector2(*backGroundDict["黒"])
             else:
                 for i in range(5):
-                    self.logBackGround[11][j] = Vector2(*backGroundDict["オレンジ"])
+                    self.logBackGround[12][j] = Vector2(*backGroundDict["オレンジ"])
                     self.logBackGround[10][j] = Vector2(*backGroundDict["黒"])
                 for j in range(4):
                     self.menu[10][j] = Vector2(*letterDict[dice[j]])
                 for j in range(3):
-                    self.menu[11][j] = Vector2(*letterDict[card[j]])
+                    self.menu[12][j] = Vector2(*letterDict[card[j]])
         else:
             pass
 
@@ -105,8 +107,8 @@ class View():
         ログ
         '''
         log = self.infoToDisplay[4]
-        self.logBackGround = [[None for j in range(22)] for i in range(11)]
-        self.log = [[None for j in range(22)] for i in range(11)]
+        self.logBackGround = [[None for j in range(22)] for i in range(12)]
+        self.log = [[None for j in range(22)] for i in range(12)]
         if not log is None:
             for i in range(3):
                 for j in range(17):
@@ -120,9 +122,9 @@ class View():
         せんたく
         '''
         select = self.infoToDisplay[5]
-        self.selectBackGround = [[None for j in range(22)] for i in range(11)]
-        self.select = [[None for j in range(22)] for i in range(11)]
-        if not log is None:
+        self.selectBackGround = [[None for j in range(22)] for i in range(12)]
+        self.select = [[None for j in range(22)] for i in range(12)]
+        if not select is None:
             for i in range(6):
                 for j in range(17):
                     self.selectBackGround[2 + i][5 + j] = Vector2(*backGroundDict["黒"])
@@ -139,8 +141,8 @@ class View():
 
     def generateHeaderLayer(self):
         header = self.infoToDisplay[8]
-        self.headerBackGround = [[None for j in range(22)] for i in range(11)]
-        self.header = [[None for j in range(22)] for i in range(11)]
+        self.headerBackGround = [[None for j in range(22)] for i in range(12)]
+        self.header = [[None for j in range(22)] for i in range(12)]
         if not header is None:
             for i in range(2):
                 for j in range(22):
@@ -152,8 +154,8 @@ class View():
 
     def generateTopLayer(self):
         top = self.infoToDisplay[9]
-        self.topBackGround = [[None for j in range(22)] for i in range(11)]
-        self.top = [[None for j in range(22)] for i in range(11)]
+        self.topBackGround = [[None for j in range(22)] for i in range(12)]
+        self.top = [[None for j in range(22)] for i in range(12)]
         if not top is None:
             for i in range(22):
                 self.topBackGround[0][i] = Vector2(*backGroundDict["黒"])
@@ -165,11 +167,11 @@ class View():
     def generateMessageLayer(self):
         message = self.infoToDisplay[11]
         if self.infoToDisplay[10]:
-            self.darken = [[Vector2(*backGroundDict["黒"]) for j in range(22)] for i in range(11)]
+            self.darken = [[Vector2(*backGroundDict["黒"]) for j in range(22)] for i in range(12)]
         else:
-            self.darken = [[None for j in range(22)] for i in range(11)]
-        self.messageBackGround = [[None for j in range(22)] for i in range(11)]
-        self.message = [[None for j in range(22)] for i in range(11)]
+            self.darken = [[None for j in range(22)] for i in range(12)]
+        self.messageBackGround = [[None for j in range(22)] for i in range(12)]
+        self.message = [[None for j in range(22)] for i in range(12)]
         for i in range(6):
             for j in range(12):
                 if self.darken:
@@ -214,9 +216,24 @@ class UserInterface():
         '''
         ここでレイヤーの順番を決めている
         '''
+
         self.layers = [
             Layer(self,"TILES/MAP.png",self.view,self.view.ground),
-            Layer(self,"TILES/UNIT.png",self.view,self.view.units)
+            Layer(self,"TILES/UNIT.png",self.view,self.view.units),
+            Layer(self,"TILES/ARROW.png",self.view,self.view.arrow),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.menuBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.menu),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.logBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.log),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.selectBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.select),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.headerBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.header),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.topBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.top),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.darken),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.messageBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.message)
         ]
 
         # Window
@@ -246,11 +263,12 @@ class UserInterface():
             conn, addr = s.accept()
             with conn:
                 while True:
-                    data = conn.recv(1024)
+                    data = conn.recv(4096)
                     if not data:
                         break
                     conn.sendall(pickle.dumps(""))
                     self.view.infoToDisplay = pickle.loads(data)
+        print(self.view.infoToDisplay)
 
     def sendOrder(self, order):
         HOST = socket.gethostbyname(socket.gethostname())
@@ -259,38 +277,43 @@ class UserInterface():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 s.connect((HOST, PORT))
                 s.sendall(pickle.dumps([HOST, order]))
-                data = s.recv(1024)
-            sleep(1)
+                data = s.recv(4096)
             return 0
         except:
             return 1
 
     def processInput(self):
-        actions = []
-        while(len(actions) == 0):
+        keyAction = False
+        while(not keyAction):
             actions = pygame.event.get()
             self.moveCommand = Vector2(0,0)
-        order = ""
-        for event in actions:
-            if event.type == pygame.QUIT:
-                self.running = False
-                break
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            order = ""
+            for event in actions:
+                if event.type == pygame.QUIT:
                     self.running = False
                     break
-                elif event.key == pygame.K_s:
-                    order = "s"
-                elif event.key == pygame.K_d:
-                    order = "d"
-                elif event.key == pygame.K_l:
-                    order = "l"
-                elif event.key == pygame.K_h:
-                    order = "h"
-                elif event.key == pygame.K_j:
-                    order = "j"
-                elif event.key == pygame.K_k:
-                    order = "k"
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+                        break
+                    elif event.key == pygame.K_s:
+                        order = "s"
+                        keyAction = True
+                    elif event.key == pygame.K_d:
+                        order = "d"
+                        keyAction = True
+                    elif event.key == pygame.K_l:
+                        order = "l"
+                        keyAction = True
+                    elif event.key == pygame.K_h:
+                        order = "h"
+                        keyAction = True
+                    elif event.key == pygame.K_j:
+                        order = "j"
+                        keyAction = True
+                    elif event.key == pygame.K_k:
+                        order = "k"
+                        keyAction = True
         input = self.sendOrder(order)
 
     def render(self):
@@ -301,9 +324,31 @@ class UserInterface():
 
         pygame.display.update()
 
+    def update(self):
+        self.layers = [
+            Layer(self,"TILES/MAP.png",self.view,self.view.ground),
+            Layer(self,"TILES/UNIT.png",self.view,self.view.units),
+            Layer(self,"TILES/ARROW.png",self.view,self.view.arrow),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.menuBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.menu),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.logBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.log),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.selectBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.select),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.headerBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.header),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.topBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.top),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.darken),
+            Layer(self,"TILES/BACKGROUND.png",self.view,self.view.messageBackGround),
+            Layer(self,"TILES/LETTER.png",self.view,self.view.message)
+        ]
+
     def run(self):
         while self.running:
             self.listen()
+            self.view.updateLayer()
+            self.update()
             self.render()
             self.processInput()
 

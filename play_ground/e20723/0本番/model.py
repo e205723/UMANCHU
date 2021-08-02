@@ -55,6 +55,7 @@ class Model():
                     conn.sendall(pickle.dumps(""))
                     loadedData = pickle.loads(data)
                     if loadedData[0] == self.users[self.userIndex].ip:
+                        sleep(1)
                         return loadedData[1]
 
     def send(self, info):
@@ -66,7 +67,6 @@ class Model():
                     s.connect((HOST, PORT))
                     s.sendall(pickle.dumps(info))
                     data = s.recv(1024)
-                    sleep(1)
             except:
                 pass
 
@@ -328,6 +328,7 @@ class Model():
 
             elif colorOfArrived == "黄":
                 self.currentMode = YellowSquareMode(None)
+
     def sendSelect(self):
         type = "select"
         user = self.users[self.userIndex]
