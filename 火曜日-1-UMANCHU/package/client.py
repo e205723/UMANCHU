@@ -251,8 +251,9 @@ class UserInterface():
     def listen(self):
         HOST = socket.gethostbyname(socket.gethostname())  # Standard loopback interface address (localhost)
         PORT = 49152   # Port to listen on (non-privileged ports are > 1023)
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((HOST, PORT))
+            s.bind((HOST, 49152))
             s.listen()
             conn, addr = s.accept()
             with conn:
@@ -267,7 +268,7 @@ class UserInterface():
         PORT = 49153        # The port used by the server
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((self.hostIP, PORT))
+                s.connect((socket.gethostbyname(socket.gethostname()), PORT))
                 s.sendall(pickle.dumps([self.hostIP, order]))
                 data = s.recv(4096)
             return 0
@@ -276,7 +277,7 @@ class UserInterface():
 
     def processInput(self):
         keyAction = False
-        while(not keyAction):
+        while (not keyAction):
             actions = pygame.event.get()
             self.moveCommand = Vector2(0,0)
             order = ""
@@ -349,7 +350,5 @@ class UserInterface():
             self.view.updateLayer()
             self.update()
             self.render()
-            print(socket.gethostbyname(socket.gethostname()))
-            print(self.view.infoToDisplay[12])
             if socket.gethostbyname(socket.gethostname()) == self.view.infoToDisplay[12]:
                 self.processInput()
