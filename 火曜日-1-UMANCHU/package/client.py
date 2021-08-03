@@ -268,8 +268,8 @@ class UserInterface():
         PORT = 49153        # The port used by the server
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((socket.gethostbyname(socket.gethostname()), PORT))
-                s.sendall(pickle.dumps([self.hostIP, order]))
+                s.connect((self.hostIP, PORT))
+                s.sendall(pickle.dumps([socket.gethostbyname(socket.gethostname()), order]))
                 data = s.recv(4096)
             return 0
         except:
