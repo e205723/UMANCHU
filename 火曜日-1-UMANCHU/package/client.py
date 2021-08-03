@@ -254,7 +254,7 @@ class UserInterface():
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             ok = False
-            while not OK:
+            while not ok:
                 try:
                     s.bind((HOST, 49152))
                     sleep(0.01)
