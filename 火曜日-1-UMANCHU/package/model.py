@@ -55,7 +55,7 @@ class Model():
                     conn.sendall(pickle.dumps(""))
                     loadedData = pickle.loads(data)
                     if loadedData[0] == self.users[self.userIndex].ip:
-                        sleep(0.3)
+                        sleep(0.2)
                         return loadedData[1]
 
     def send(self, info):
