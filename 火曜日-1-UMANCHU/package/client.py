@@ -263,7 +263,7 @@ class UserInterface():
                         break
                     conn.sendall(pickle.dumps(""))
                     self.view.infoToDisplay = pickle.loads(data)
-                    sleep(0.3)
+                    sleep(0.2)
 
     def sendOrder(self, order):
         PORT = 49153        # The port used by the server
