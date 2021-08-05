@@ -257,7 +257,6 @@ class UserInterface():
             while not ok:
                 try:
                     s.bind((HOST, 49152))
-                    sleep(0.01)
                     ok = True
                 except:
                     pass
@@ -353,9 +352,11 @@ class UserInterface():
         music = False
         while self.running:
             self.listen()
+            '''
             if not music:
                 self.playMusic()
                 music = True
+            '''
             self.view.updateLayer()
             self.update()
             self.render()
