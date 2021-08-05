@@ -86,6 +86,7 @@ class Model():
         info = [None for _ in range(13)]
         info[12] = self.users[self.userIndex].ip
         self.send(info)
+        self.listenKeyAction("update")
 
     def getDistanceFromDestiny(self, coordinate):
         horizontlDistance = (coordinate[0] - self.destination.coordinate[0])/3
@@ -280,6 +281,8 @@ class Model():
                 self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append(str(self.userIndex) + keyAction)
                 user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
                 user.direction = keyAction
+        elif type == "update":
+            self.listen()
 
     def sendMessage(self, message, mode):
         type = "message"
