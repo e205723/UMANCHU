@@ -259,6 +259,7 @@ class UserInterface():
                 try:
                     s.bind((HOST, PORT))
                     ok = True
+                    sleep(0.01)
                 except:
                     if first:
                         tried += 1
