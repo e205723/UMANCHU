@@ -20,8 +20,8 @@ class Model():
         destinationIndex = 5
         while destinationIndex == 5:
             destinationIndex = randint(0,67)
-        distinationInfo = self.map.propertyInfo[destinationIndex]
-        self.destination = self.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
+        destinationInfo = self.map.propertyInfo[destinationIndex]
+        self.destination = self.map.squaresMatrix[destinationInfo[1][1]][destinationInfo[1][0]]
         self.map.squaresMatrix[self.destination.coordinate[1]][self.destination.coordinate[0]].color = "目駅"
 
         for user in self.users:
@@ -44,7 +44,13 @@ class Model():
         HOST = socket.gethostbyname(socket.gethostname())
         PORT = 49153
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((HOST, PORT))
+            ok = False
+            while not ok:
+                try:
+                    s.bind((HOST, PORT))
+                    ok = True
+                except:
+                    pass
             s.listen()
             conn, addr = s.accept()
             with conn:
@@ -113,6 +119,11 @@ class Model():
 
         return result
 
+    def calcDistanceFromDestiny(self, coordinate):
+        horizontlDistance = (coordinate[0] - self.destination.coordinate[0])
+        verticalDistance = (coordinate[1] - self.destination.coordinate[1])
+        return horizontlDistance**2 + verticalDistance**2
+
     def kanjiMoney(self, money):
         kanjiMoney = ""
         num = money * 1
@@ -136,7 +147,28 @@ class Model():
         return [[self.map.squaresMatrix[coordinate[1] + i - 5][coordinate[0] + j - 13].color for j in range(22)] for i in range(11)]
 
     def getUnitMap(self, coordinate):
-        return [[self.unitMap[coordinate[1] + i - 5][coordinate[0] + j - 13][-1] for j in range(22)] for i in range(11)]
+        self.addDemerit()
+        result = [[self.unitMap[coordinate[1] + i - 5][coordinate[0] + j - 13][-1] for j in range(22)] for i in range(11)]
+        self.deleteDemerite()
+        return result
+
+    def addDemerit(self):
+        for user in self.users:
+            if user.demerit:
+                h = 1 * int(user.direction == "h")
+                j = - 1 * int(user.direction == "j")
+                k = 1 * int(user.direction == "k")
+                l = - 1 * int(user.direction == "l")
+                self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append("4" + user.direction)
+
+    def deleteDemerite(self):
+        for user in self.users:
+            if user.demerit:
+                h = 1 * int(user.direction == "h")
+                j = - 1 * int(user.direction == "j")
+                k = 1 * int(user.direction == "k")
+                l = - 1 * int(user.direction == "l")
+                self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].pop(-1)
 
     def getArrowDirection(self, coordinate):
         horizontlDistance = (coordinate[0] - self.destination.coordinate[0])
@@ -228,7 +260,6 @@ class Model():
                 elif keyAction == "s":
                     self.currentMode.goBack(self)
                 elif keyAction == "d":
-                    self.selectIndex = 0
                     self.currentMode = BuyingPropery(self.currentMode)
             elif self.selectThreeOrSix == 1:
                 if keyAction == "j" and self.selectIndex != len(self.users[self.userIndex].cards) - 1:
@@ -265,22 +296,29 @@ class Model():
             l2 = int(keyAction == "l")
 
             if keyAction in "hjkl" and self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l].isStoppable and self.map.squaresMatrix[user.coordinate[1] + j2 + k2][user.coordinate[0] + h2 + l2].isAccessible:
+                step = 0
                 if len(user.visitedSquares) == 0:
                     user.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                    user.steps -= 1
+                    step = -1
                 else:
                     if user.visitedSquares[-1] == self.map.squaresMatrix[user.coordinate[1] + j + k][user.coordinate[0] + h + l]:
                         user.visitedSquares.pop(-1)
-                        user.steps += 1
+                        step = 1
                     else:
                         user.visitedSquares.append(self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]])
-                        user.steps -= 1
+                        step = -1
+                user.steps += step
+                if bool((-step + 1) / 2) and len(self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l]) > 1:
+                    self.users[int(self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l][-1][0])].demerit, user.demerit = user.demerit, self.users[int(self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l][-1][0])].demerit
+                elif not bool((-step + 1) / 2) and len(self.unitMap[user.coordinate[1]][user.coordinate[0]]) > 2:
+                    self.users[int(self.unitMap[user.coordinate[1]][user.coordinate[0]][-2][0])].demerit, self.users[int(self.unitMap[user.coordinate[1]][user.coordinate[0]][-1][0])].demerit = self.users[int(self.unitMap[user.coordinate[1]][user.coordinate[0]][-1][0])].demerit, self.users[int(self.unitMap[user.coordinate[1]][user.coordinate[0]][-2][0])].demerit
                 self.unitMap[user.coordinate[1]][user.coordinate[0]].remove(str(self.userIndex) + user.direction)
-                if not keyAction in "ghjk":
-                    keyAction = "k"
                 self.unitMap[user.coordinate[1] + j + k][user.coordinate[0] + h + l].append(str(self.userIndex) + keyAction)
-                user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
                 user.direction = keyAction
+                user.coordinate = [user.coordinate[0] + h + l, user.coordinate[1] + j + k]
+                if len(self.unitMap[user.coordinate[1]][user.coordinate[0]]) > 2:
+                    if self.users[int(self.unitMap[user.coordinate[1]][user.coordinate[0]][-2][0])].demerit:
+                        self.unitMap[user.coordinate[1]][user.coordinate[0]][-2], self.unitMap[user.coordinate[1]][user.coordinate[0]][-1] = self.unitMap[user.coordinate[1]][user.coordinate[0]][-1], self.unitMap[user.coordinate[1]][user.coordinate[0]][-2]
         elif type == "update":
             self.listen()
 
@@ -298,7 +336,7 @@ class Model():
             self.messageIndex = 0
             if mode == "opening":
                 self.currentMode = Menu(None)
-            elif mode == "desitinationSquareMode":
+            elif mode == "DestinationSquareMode":
                 self.currentMode = BuyingPropery(None)
             elif mode == "gettingSettlement":
                 if self.time.hasReachedTheLimit():
@@ -350,13 +388,13 @@ class Model():
         if self.users[self.userIndex].steps == 0:
             colorOfArrived = self.map.squaresMatrix[self.users[self.userIndex].coordinate[1]][self.users[self.userIndex].coordinate[0]].color
             if colorOfArrived == "目駅":
-                self.currentMode = DesitinationSquareMode(None)
-                pass
+                self.currentMode = DestinationSquareMode(None)
+
             elif colorOfArrived == "駅":
                 self.selectIndex = 0
                 self.selectThreeOrSix = 0
                 self.currentMode = StationSquareMode(None)
-                pass
+
             elif colorOfArrived == "青":
                 self.currentMode = BlueSquareMode(None)
 

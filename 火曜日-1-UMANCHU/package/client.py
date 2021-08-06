@@ -256,11 +256,10 @@ class UserInterface():
             ok = False
             while not ok:
                 try:
-                    s.bind((HOST, 49152))
+                    s.bind((HOST, PORT))
                     ok = True
                 except:
                     pass
-
             s.listen()
             conn, addr = s.accept()
             with conn:

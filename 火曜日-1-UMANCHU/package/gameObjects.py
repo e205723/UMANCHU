@@ -20,6 +20,8 @@ class User(Unit):
         self.cards = [Card("きゅうこうカード")]
         self.steps = 0
         self.visitedSquares = []
+        self.demerit = False
+        self.previousCoordinate = [55, 11]
 
     def calcSettlement(self):
         sum = 0
@@ -261,27 +263,40 @@ class BuyingPropery(Mode):
             log = messages[10].replace("$1", property.owner)
             log = log.replace("$2", property.name)
         log += " d をおしてください"
-
+        model.selectIndex = 0
         model.sendLog(log, self.mode)
 
-class DesitinationSquareMode(Mode):
+class DestinationSquareMode(Mode):
     def __init__(self, previous):
-        super(DesitinationSquareMode, self).__init__(previous)
-        self.mode = "desitinationSquareMode"
+        super(DestinationSquareMode, self).__init__(previous)
+        self.mode = "DestinationSquareMode"
 
     def flow(self, model):
+
+        farthestUserIndex = 0
+        maxDistance = 0
+        for index in range(4):
+            calclatedDistance = model.calcDistanceFromDestiny(model.users[index].coordinate)
+            if maxDistance < calclatedDistance:
+                farthestUserIndex = index
+                maxDistance = calclatedDistance
+
+        for i in range(4):
+            model.users[i].demerit = (i == farthestUserIndex)
+
         prize = 0
         for property in model.destination.properties:
             prize += property.price
         model.users[model.userIndex].money += int(prize/3)
         model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "駅"
         destinationIndex = randint(0,67)
-        distinationInfo = model.map.propertyInfo[destinationIndex]
-        model.destination = model.map.squaresMatrix[distinationInfo[1][1]][distinationInfo[1][0]]
+        destinationInfo = model.map.propertyInfo[destinationIndex]
+        model.destination = model.map.squaresMatrix[destinationInfo[1][1]][destinationInfo[1][0]]
         model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "目駅"
         message = messages[11].replace("$1", model.users[model.userIndex].name)
         message = message.replace("$2", str(prize))
         message = message.replace("$3", model.destination.name)
+        message = message.replace("$4", model.users[farthestUserIndex].name)
         model.sendMessage(message, self.mode)
 
 class CardMode(Mode):
