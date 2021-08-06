@@ -7,13 +7,14 @@
   - pygame 2.0.1
 
 # 実行方法
-- `火曜日-1-UMANCHU`ディレクトリ下で, コマンド`$source env_for_pygame/bin/activate`を実行
-- `python3 app.py`を実行
+- `火曜日-1-UMANCHU`ディレクトリ下で, コマンド`$ source env_for_pygame/bin/activate`を実行
+- `$ python3 app.py`を実行
    - 自分のPCの使用しているIPアドレスが表示されるのでコピーアンドペーストしてEnter
    - ホスト側の起動を待機する状態になるので, 別のターミナルを開いて次の校庭へ進む
-- 別のターミナル, 同じディレクトリで`python3 app_server.py`を実行
+- 別のターミナル, 同じディレクトリで`$ source env_for_pygame/bin/activate`を実行したのち, `$ python3 app_server.py`を実行
   - 自分のIPアドレスが自動で入力されるので, プレイヤー2,3,4の分のIPアドレスも登録する
     - 「IPアドレスを入力してEnterを押す」を3人分繰り返す
       - 自分のIPアドレスをホスト以外の3人のIPアドレスとして登録することができる
   - プレイヤー1(ホスト),2,3,4の名前を登録する
     - 「アルファベット3文字を入力してEnterを押す」を4人分繰り返す
+- ゲームが終了したら`$ deactivate`を実行
