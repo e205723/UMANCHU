@@ -211,6 +211,8 @@ class Model():
             info[9] = user.name + " あと" + str(user.steps) + "ほ"
             if "駅" in self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].color:
                 info[9] += " ここは" + self.map.squaresMatrix[user.coordinate[1]][user.coordinate[0]].name
+            else:
+                info[9] += " " + self.getDistanceFromDestiny(user.coordinate)
         elif type == "select":
             info[0] = self.getExtractedMap(user.coordinate)
             info[1] = self.getUnitMap(user.coordinate)
@@ -368,17 +370,20 @@ class Model():
                 self.currentMode = AfterThrowingDice(None)
             elif mode in ["afterThrowingDice", "usingCard"]:
                 self.currentMode = Moving(self.currentMode)
-            elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyingPropery"]:
-                self.users[self.userIndex].visitedSquares = []
-                self.updateUserIndex()
-                if self.userIndex == 0:
-                    self.time.update()
-                    if self.time.isMarchOver():
-                        self.currentMode = GettingSettlement(None)
+            elif mode in ["blueSquareMode", "redSquareMode", "yellowSquareMode", "buyingPropery", "demerit"]:
+                if self.users[self.userIndex].demerit and len(self.users[self.userIndex].cards) >= 1 and mode != "demerit":
+                    self.sendLog(messages[15].replace("$1", self.users[self.userIndex].name).replace("$2", self.users[self.userIndex].cards.pop(randint(0,len(self.users[self.userIndex].cards) - 1)).name), "demerit")
+                else:
+                    self.users[self.userIndex].visitedSquares = []
+                    self.updateUserIndex()
+                    if self.userIndex == 0:
+                        self.time.update()
+                        if self.time.isMarchOver():
+                            self.currentMode = GettingSettlement(None)
+                        else:
+                            self.currentMode =  Menu(None)
                     else:
                         self.currentMode =  Menu(None)
-                else:
-                    self.currentMode =  Menu(None)
 
     def sendMoving(self):
         type = "moving"

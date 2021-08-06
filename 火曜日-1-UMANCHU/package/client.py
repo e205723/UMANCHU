@@ -248,18 +248,22 @@ class UserInterface():
     def cellHeight(self):
         return int(self.cellSize.y)
 
-    def listen(self):
+    def listen(self, first):
         HOST = socket.gethostbyname(socket.gethostname())  # Standard loopback interface address (localhost)
         PORT = 49152   # Port to listen on (non-privileged ports are > 1023)
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             ok = False
-            while not ok:
+            tried = 0
+            while not ok and tried < 100:
                 try:
                     s.bind((HOST, PORT))
                     ok = True
                 except:
-                    pass
+                    if first:
+                        tried += 1
+                        if tried == 100:
+                            return
             s.listen()
             conn, addr = s.accept()
             with conn:
@@ -350,7 +354,10 @@ class UserInterface():
     def run(self):
         music = False
         while self.running:
-            self.listen()
+            first = True
+            self.listen(first)
+            if first:
+                first = False
             '''
             if not music:
                 self.playMusic()

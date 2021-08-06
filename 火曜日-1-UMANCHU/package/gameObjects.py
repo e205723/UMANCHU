@@ -294,7 +294,7 @@ class DestinationSquareMode(Mode):
         model.destination = model.map.squaresMatrix[destinationInfo[1][1]][destinationInfo[1][0]]
         model.map.squaresMatrix[model.destination.coordinate[1]][model.destination.coordinate[0]].color = "目駅"
         message = messages[11].replace("$1", model.users[model.userIndex].name)
-        message = message.replace("$2", str(prize))
+        message = message.replace("$2", model.kanjiMoney(prize))
         message = message.replace("$3", model.destination.name)
         message = message.replace("$4", model.users[farthestUserIndex].name)
         model.sendMessage(message, self.mode)
